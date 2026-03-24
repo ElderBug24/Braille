@@ -109,3 +109,83 @@ impl BrailleChar {
     }
 }
 
+pub struct BrailleCharGridArray<const COLUMNS: usize, const ROWS: usize> {
+    pub array: [[BrailleChar; COLUMNS]; ROWS]
+}
+
+impl<const COLUMNS: usize, const ROWS: usize> BrailleCharGridArray<COLUMNS, ROWS> {
+    pub fn new() -> Self {
+        return Self {
+            array: [[BrailleChar::Ordered(0u8); COLUMNS]; ROWS]
+        };
+    }
+
+    pub fn get(&self, x: usize, y: usize) -> bool {
+        assert!(x < COLUMNS * 2);
+        assert!(y < ROWS * 4);
+
+        let c = x.div_euclid(COLUMNS);
+        let c_ = x - c * COLUMNS;
+
+        let r = y.div_euclid(ROWS);
+        let r_ = y - r * ROWS;
+
+        return self.array[r][c].get(c_ as u8, r_ as u8);
+    }
+
+    pub fn get_unchecked(&self, x: usize, y: usize) -> bool {
+        let c = x.div_euclid(COLUMNS);
+        let c_ = x - c * COLUMNS;
+
+        let r = y.div_euclid(ROWS);
+        let r_ = y - r * ROWS;
+
+        return self.array[r][c].get_unchecked(c_ as u8, r_ as u8);
+    }
+
+    pub fn get_char(&self, x: usize, y: usize) -> BrailleChar {
+        assert!(x < COLUMNS * 2);
+        assert!(y < ROWS * 4);
+
+        return self.array[y][x];
+    }
+
+    pub fn get_char_unchecked(&self, x: usize, y: usize) -> BrailleChar {
+        return self.array[y][x];
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, value: bool) {
+        assert!(x < COLUMNS * 2);
+        assert!(y < ROWS * 4);
+
+        let c = x.div_euclid(COLUMNS);
+        let c_ = x - c * COLUMNS;
+
+        let r = y.div_euclid(ROWS);
+        let r_ = y - r * ROWS;
+
+        return self.array[r][c].set(c_ as u8, r_ as u8, value);
+    }
+
+    pub fn set_unchecked(&mut self, x: usize, y: usize, value: bool) {
+        let c = x.div_euclid(COLUMNS);
+        let c_ = x - c * COLUMNS;
+
+        let r = y.div_euclid(ROWS);
+        let r_ = y - r * ROWS;
+
+        return self.array[r][c].set_unchecked(c_ as u8, r_ as u8, value);
+    }
+
+    pub fn set_char(&mut self, x: usize, y: usize, value: BrailleChar) {
+        assert!(x < COLUMNS * 2);
+        assert!(y < ROWS * 4);
+
+        self.array[y][x] = value;
+    }
+
+    pub fn set_char_unchecked(&mut self, x: usize, y: usize, value: BrailleChar) {
+        self.array[y][x] = value;
+    }
+}
+
