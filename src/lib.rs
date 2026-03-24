@@ -1,3 +1,4 @@
+use std::ops::Range;
 
 
 #[derive(Copy, Clone, Debug)]
@@ -7,7 +8,7 @@ pub enum BrailleChar {
 }
 
 impl BrailleChar {
-    const OFFSET: u32 = 0x2800;
+    pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
 
     pub fn unordered(&self) -> u8 {
         return match self {
@@ -58,7 +59,7 @@ impl BrailleChar {
     }
 
     pub fn u32_char(&self) -> u32 {
-        return Self::OFFSET + self.ordered() as u32;
+        return Self::CHAR_RANGE.start + self.ordered() as u32;
     }
 
     pub fn char(&self) -> char {
@@ -66,15 +67,17 @@ impl BrailleChar {
     }
 
     pub fn from_u32_char(char: u32) -> Option<Self> {
-        const MAX: u32 = BrailleChar::OFFSET + u8::MAX as u32;
+        const MIN: u32 = BrailleChar::CHAR_RANGE.start;
+        const MAX: u32 = BrailleChar::CHAR_RANGE.end;
+
         return match char {
-            Self::OFFSET..MAX => Some(Self::Ordered((char - Self::OFFSET) as u8)),
+            MIN..MAX => Some(Self::Ordered((char - Self::CHAR_RANGE.start) as u8)),
             _ => None
         };
     }
 
     pub fn from_u32_char_unchecked(char: u32) -> Self {
-        return Self::Ordered((char - Self::OFFSET) as u8);
+        return Self::Ordered((char - Self::CHAR_RANGE.start) as u8);
     }
 
     pub fn from_char(char: char) -> Option<Self> {
