@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum BrailleChar {
     UnOrdered(u8),
     Ordered(u8)
@@ -42,26 +42,32 @@ impl BrailleChar {
         };
     }
 
+    #[inline(always)]
     pub fn into_unordered(&self) -> Self {
         return Self::UnOrdered(self.unordered());
     }
 
+    #[inline(always)]
     pub fn into_ordered(&self) -> Self {
         return Self::Ordered(self.ordered());
     }
 
+    #[inline(always)]
     pub fn into_ordered_assign(&mut self) {
-        *self = Self::Ordered(self.ordered());
+        *self = self.into_ordered();
     }
 
+    #[inline(always)]
     pub fn into_unordered_assign(&mut self) {
-        *self = Self::UnOrdered(self.unordered());
+        *self = self.into_unordered();
     }
 
+    #[inline(always)]
     pub fn u32_char(&self) -> u32 {
         return Self::CHAR_RANGE.start + self.ordered() as u32;
     }
 
+    #[inline(always)]
     pub fn char(&self) -> char {
         return unsafe { char::from_u32_unchecked(self.u32_char()) };
     }
@@ -76,14 +82,17 @@ impl BrailleChar {
         };
     }
 
+    #[inline(always)]
     pub fn from_u32_char_unchecked(char: u32) -> Self {
         return Self::Ordered((char - Self::CHAR_RANGE.start) as u8);
     }
 
+    #[inline(always)]
     pub fn from_char(char: char) -> Option<Self> {
         return Self::from_u32_char(char as u32);
     }
 
+    #[inline(always)]
     pub fn from_char_unchecked(char: char) -> Self {
         return Self::from_u32_char_unchecked(char as u32);
     }
@@ -92,9 +101,10 @@ impl BrailleChar {
         assert!(x < 2);
         assert!(y < 4);
 
-        return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
+        return self.get_unchecked(x, y);
     }
 
+    #[inline(always)]
     pub fn get_unchecked(&self, x: u8, y: u8) -> bool {
         return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
     }
@@ -104,11 +114,13 @@ impl BrailleChar {
         assert!(x < 2);
         assert!(y < 4);
 
-        *self = Self::UnOrdered(self.unordered() & (0b_1111_1111 ^ ((!value as u8) << (7 - (x + y * 2)))));
+        self.set_unchecked(x, y, value);
     }
 
+    #[inline(always)]
     pub fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        *self = Self::UnOrdered(self.unordered() & (0b_1111_1111 ^ ((!value as u8) << (7 - (x + y * 2)))));
+        let o = 7 - x - y * 2;
+        *self = Self::UnOrdered(self.unordered() & !(1 << o) | (value as u8) << o);
     }
 }
 

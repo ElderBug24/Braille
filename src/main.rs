@@ -20,15 +20,6 @@ fn input(prompt: &str) -> Result<String, &str> {
 fn main() {
     println!("Hello, world!");
 
-    println!("{:08b}", 0b1100_1011);
-
-    let a = BrailleChar::UnOrdered(0b_11001011);
-    let a = BrailleChar::Ordered(a.ordered());
-    let a = BrailleChar::UnOrdered(a.unordered());
-    let c = a.char();
-
-    println!("b: |{}|", c);
-
     'main: loop {
         // let input = input("03\n14\n25\n67\n  01234567\n> ").unwrap();
         let input = input("01\n23\n45\n67\n  01234567\n> ").unwrap();
@@ -45,6 +36,8 @@ fn main() {
             } else { break 'main; }
         }
 
+        println!("{:08b}", byte);
+        println!("{:08b}", BrailleChar::UnOrdered(byte).ordered());
         let char = BrailleChar::UnOrdered(byte);
 
         println!("\n{}\n", char.char());
