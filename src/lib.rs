@@ -124,6 +124,7 @@ impl BrailleChar {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct BrailleCharGridArray<const COLUMNS: usize, const ROWS: usize> {
     pub array: [[BrailleChar; COLUMNS]; ROWS]
 }
@@ -139,21 +140,21 @@ impl<const COLUMNS: usize, const ROWS: usize> BrailleCharGridArray<COLUMNS, ROWS
         assert!(x < COLUMNS * 2);
         assert!(y < ROWS * 4);
 
-        let c = x.div_euclid(COLUMNS);
-        let c_ = x - c * COLUMNS;
+        let c = x.div_euclid(2);
+        let c_ = x - c * 2;
 
-        let r = y.div_euclid(ROWS);
-        let r_ = y - r * ROWS;
+        let r = y.div_euclid(4);
+        let r_ = y - r * 4;
 
         return self.array[r][c].get(c_ as u8, r_ as u8);
     }
 
     pub fn get_unchecked(&self, x: usize, y: usize) -> bool {
-        let c = x.div_euclid(COLUMNS);
-        let c_ = x - c * COLUMNS;
+        let c = x.div_euclid(2);
+        let c_ = x - c * 2;
 
-        let r = y.div_euclid(ROWS);
-        let r_ = y - r * ROWS;
+        let r = y.div_euclid(4);
+        let r_ = y - r * 4;
 
         return self.array[r][c].get_unchecked(c_ as u8, r_ as u8);
     }
@@ -173,21 +174,21 @@ impl<const COLUMNS: usize, const ROWS: usize> BrailleCharGridArray<COLUMNS, ROWS
         assert!(x < COLUMNS * 2);
         assert!(y < ROWS * 4);
 
-        let c = x.div_euclid(COLUMNS);
-        let c_ = x - c * COLUMNS;
+        let c = x.div_euclid(2);
+        let c_ = x - c * 2;
 
-        let r = y.div_euclid(ROWS);
-        let r_ = y - r * ROWS;
+        let r = y.div_euclid(4);
+        let r_ = y - r * 4;
 
         return self.array[r][c].set(c_ as u8, r_ as u8, value);
     }
 
     pub fn set_unchecked(&mut self, x: usize, y: usize, value: bool) {
-        let c = x.div_euclid(COLUMNS);
-        let c_ = x - c * COLUMNS;
+        let c = x.div_euclid(2);
+        let c_ = x - c * 2;
 
-        let r = y.div_euclid(ROWS);
-        let r_ = y - r * ROWS;
+        let r = y.div_euclid(4);
+        let r_ = y - r * 4;
 
         return self.array[r][c].set_unchecked(c_ as u8, r_ as u8, value);
     }
