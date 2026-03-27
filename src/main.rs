@@ -20,27 +20,6 @@ fn input(prompt: &str) -> Result<String, &str> {
 fn main() {
     println!("Hello, world!");
 
-    const W: usize = 10;
-    const H: usize = 10;
-    let mut array: BrailleCharGridArray<W, H> = BrailleCharGridArray::new();
-    let w = W * 2;
-    let h = H * 4;
-    for x in 0..w {
-        for y in 0..h {
-            let d2 = (x - W).pow(2) + (y - H * 2).pow(2) / 4;
-            if d2 < (W / 2).pow(2) {
-                array.set(x, y, true);
-            }
-        }
-    }
-
-    for y in 0..W {
-        for x in 0..H {
-            print!("{}", array.get_char(x, y).char());
-        }
-        println!();
-    }
-
     'main: loop {
         let input = input("01\n23\n45\n67\n  01234567\n> ").unwrap();
 
