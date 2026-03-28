@@ -9,6 +9,8 @@ pub enum BrailleChar {
 
 impl BrailleChar {
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
+    pub const WIDTH: usize = 2;
+    pub const HEIGHT: usize = 4;
 
     pub fn unordered(&self) -> u8 {
         return match self {
