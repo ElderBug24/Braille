@@ -9,7 +9,7 @@ const BYTE_B_ORDERED: u8 = 183;
 
 #[test]
 fn from_u8_ordered() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     assert_eq!(CHAR_A, char.char());
 }
@@ -30,14 +30,14 @@ fn to_u8_ordered() {
 
 #[test]
 fn to_u8_unordered() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     assert_eq!(BYTE_A_UNORDERED, char.unordered());
 }
 
 #[test]
 fn ordered_unordered() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
     let char2 = BrailleChar::from_unordered(char.unordered());
 
     assert_eq!(BYTE_A_ORDERED, char2.ordered());
@@ -46,7 +46,7 @@ fn ordered_unordered() {
 #[test]
 fn unordered_ordered() {
     let char = BrailleChar::from_unordered(BYTE_A_UNORDERED);
-    let char2 = BrailleChar(char.ordered());
+    let char2 = BrailleChar::from_ordered(char.ordered());
 
     assert_eq!(BYTE_A_UNORDERED, char2.unordered());
 }
@@ -55,7 +55,7 @@ fn unordered_ordered() {
 fn from_char() {
     let char = BrailleChar::from_char(CHAR_A);
 
-    assert_eq!(Some(BrailleChar(BYTE_A_ORDERED)), char);
+    assert_eq!(Some(BrailleChar::from_ordered(BYTE_A_ORDERED)), char);
 
     let char = char.unwrap();
 
@@ -78,7 +78,7 @@ fn from_char_u32_panic() {
 
 #[test]
 fn get() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     assert_eq!(true, char.get(0, 0));
     assert_eq!(true, char.get(1, 0));
@@ -105,7 +105,7 @@ fn set() {
 #[test]
 #[should_panic]
 fn get_panic() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     char.get(2, 0);
 }
@@ -113,7 +113,7 @@ fn get_panic() {
 #[test]
 #[should_panic]
 fn get_panic_2() {
-    let char = BrailleChar(BYTE_A_ORDERED);
+    let char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     char.get(0, 4);
 }
@@ -121,7 +121,7 @@ fn get_panic_2() {
 #[test]
 #[should_panic]
 fn set_panic() {
-    let mut char = BrailleChar(BYTE_A_ORDERED);
+    let mut char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     char.set(2, 0, false);
 }
@@ -129,7 +129,7 @@ fn set_panic() {
 #[test]
 #[should_panic]
 fn set_panic_2() {
-    let mut char = BrailleChar(BYTE_A_ORDERED);
+    let mut char = BrailleChar::from_ordered(BYTE_A_ORDERED);
 
     char.set(0, 4, false);
 }
