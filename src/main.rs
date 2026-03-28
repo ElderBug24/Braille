@@ -34,7 +34,7 @@ fn main() {
                 byte += 0b_1000_0000 >> i;
             } else { break 'main; }
         }
-        let char = BrailleChar::UnOrdered(byte);
+        let char = BrailleChar::from_unordered(byte);
 
         println!("\n{}\n", char.char());
     }

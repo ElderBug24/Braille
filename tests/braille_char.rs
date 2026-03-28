@@ -9,44 +9,44 @@ const BYTE_B_ORDERED: u8 = 183;
 
 #[test]
 fn from_u8_ordered() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let char = BrailleChar(BYTE_A_ORDERED);
 
     assert_eq!(CHAR_A, char.char());
 }
 
 #[test]
 fn from_u8_unordered() {
-    let char = BrailleChar::UnOrdered(BYTE_A_UNORDERED);
+    let char = BrailleChar::from_unordered(BYTE_A_UNORDERED);
 
     assert_eq!(CHAR_A, char.char());
 }
 
 #[test]
 fn to_u8_ordered() {
-    let char = BrailleChar::UnOrdered(BYTE_A_UNORDERED);
+    let char = BrailleChar::from_unordered(BYTE_A_UNORDERED);
 
     assert_eq!(BYTE_A_ORDERED, char.ordered());
 }
 
 #[test]
 fn to_u8_unordered() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let char = BrailleChar(BYTE_A_ORDERED);
 
     assert_eq!(BYTE_A_UNORDERED, char.unordered());
 }
 
 #[test]
 fn ordered_unordered() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
-    let char2 = BrailleChar::UnOrdered(char.unordered());
+    let char = BrailleChar(BYTE_A_ORDERED);
+    let char2 = BrailleChar::from_unordered(char.unordered());
 
     assert_eq!(BYTE_A_ORDERED, char2.ordered());
 }
 
 #[test]
 fn unordered_ordered() {
-    let char = BrailleChar::UnOrdered(BYTE_A_UNORDERED);
-    let char2 = BrailleChar::Ordered(char.ordered());
+    let char = BrailleChar::from_unordered(BYTE_A_UNORDERED);
+    let char2 = BrailleChar(char.ordered());
 
     assert_eq!(BYTE_A_UNORDERED, char2.unordered());
 }
@@ -55,7 +55,7 @@ fn unordered_ordered() {
 fn from_char() {
     let char = BrailleChar::from_char(CHAR_A);
 
-    assert_eq!(Some(BrailleChar::Ordered(BYTE_A_ORDERED)), char);
+    assert_eq!(Some(BrailleChar(BYTE_A_ORDERED)), char);
 
     let char = char.unwrap();
 
@@ -73,12 +73,12 @@ fn from_char_u32() {
 #[test]
 #[should_panic]
 fn from_char_u32_panic() {
-    let char = BrailleChar::from_u32_char(0xFF69).unwrap();
+    let _char = BrailleChar::from_u32_char(0xFF69).unwrap();
 }
 
 #[test]
 fn get() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let char = BrailleChar(BYTE_A_ORDERED);
 
     assert_eq!(true, char.get(0, 0));
     assert_eq!(true, char.get(1, 0));
@@ -92,7 +92,7 @@ fn get() {
 
 #[test]
 fn set() {
-    let mut char = BrailleChar::UnOrdered(BYTE_A_UNORDERED);
+    let mut char = BrailleChar::from_unordered(BYTE_A_UNORDERED);
 
     char.set(1, 0, false);
     char.set(1, 1, true);
@@ -105,7 +105,7 @@ fn set() {
 #[test]
 #[should_panic]
 fn get_panic() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let char = BrailleChar(BYTE_A_ORDERED);
 
     char.get(2, 0);
 }
@@ -113,7 +113,7 @@ fn get_panic() {
 #[test]
 #[should_panic]
 fn get_panic_2() {
-    let char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let char = BrailleChar(BYTE_A_ORDERED);
 
     char.get(0, 4);
 }
@@ -121,7 +121,7 @@ fn get_panic_2() {
 #[test]
 #[should_panic]
 fn set_panic() {
-    let mut char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let mut char = BrailleChar(BYTE_A_ORDERED);
 
     char.set(2, 0, false);
 }
@@ -129,7 +129,7 @@ fn set_panic() {
 #[test]
 #[should_panic]
 fn set_panic_2() {
-    let mut char = BrailleChar::Ordered(BYTE_A_ORDERED);
+    let mut char = BrailleChar(BYTE_A_ORDERED);
 
     char.set(0, 4, false);
 }
