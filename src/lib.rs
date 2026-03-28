@@ -72,7 +72,7 @@ impl BrailleChar {
         return unsafe { char::from_u32_unchecked(self.u32_char()) };
     }
 
-    pub fn from_u32_char(char: u32) -> Option<Self> {
+    pub const fn from_u32_char(char: u32) -> Option<Self> {
         const MIN: u32 = BrailleChar::CHAR_RANGE.start;
         const MAX: u32 = BrailleChar::CHAR_RANGE.end;
 
@@ -83,17 +83,17 @@ impl BrailleChar {
     }
 
     #[inline(always)]
-    pub fn from_u32_char_unchecked(char: u32) -> Self {
+    pub const fn from_u32_char_unchecked(char: u32) -> Self {
         return Self::Ordered((char - Self::CHAR_RANGE.start) as u8);
     }
 
     #[inline(always)]
-    pub fn from_char(char: char) -> Option<Self> {
+    pub const fn from_char(char: char) -> Option<Self> {
         return Self::from_u32_char(char as u32);
     }
 
     #[inline(always)]
-    pub fn from_char_unchecked(char: char) -> Self {
+    pub const fn from_char_unchecked(char: char) -> Self {
         return Self::from_u32_char_unchecked(char as u32);
     }
 
@@ -130,10 +130,18 @@ pub struct BrailleCharGridArray<const COLUMNS: usize, const ROWS: usize> {
 }
 
 impl<const COLUMNS: usize, const ROWS: usize> BrailleCharGridArray<COLUMNS, ROWS> {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             array: [[BrailleChar::Ordered(0u8); COLUMNS]; ROWS]
         };
+    }
+
+    pub const fn width(&self) -> usize {
+        return COLUMNS * 2;
+    }
+
+    pub const fn height(&self) -> usize {
+        return ROWS * 4;
     }
 
     pub fn get(&self, x: usize, y: usize) -> bool {
