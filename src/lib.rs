@@ -1,6 +1,6 @@
 pub mod array;
 
-pub use array::BrailleCharGridArray;
+pub use array::{BrailleCharGridArray, BrailleCharGridArrayUnOrdered};
 
 use std::ops::Range;
 

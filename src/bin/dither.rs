@@ -1,4 +1,4 @@
-use braille::BrailleCharGridArray;
+use braille::BrailleCharGridArrayUnOrdered;
 
 use glam::Vec3;
 
@@ -61,7 +61,7 @@ fn main() {
     assert_eq!(400, w);
     assert_eq!(400, h);
 
-    let mut array: BrailleCharGridArray<200, 100> = BrailleCharGridArray::new();
+    let mut array: BrailleCharGridArrayUnOrdered<200, 100> = BrailleCharGridArrayUnOrdered::new();
 
     for y in 0..h {
         for x in 0..w {
@@ -117,7 +117,7 @@ fn main() {
     assert_eq!(400, w);
     assert_eq!(200, h);
 
-    let mut array: BrailleCharGridArray<200, 50> = BrailleCharGridArray::new();
+    let mut array: BrailleCharGridArrayUnOrdered<200, 50> = BrailleCharGridArrayUnOrdered::new();
 
     for y in 0..h {
         for x in 0..w {
