@@ -55,7 +55,7 @@ impl Buffer {
 }
 
 fn main() {
-    let mut img = Buffer::from_file("assets/catHD.png");
+    let mut img = Buffer::from_file("assets/cat.png");
     let (w, h) = img.dimensions();
 
     assert_eq!(400, w);
