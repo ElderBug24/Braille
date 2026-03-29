@@ -1,4 +1,4 @@
-use braille::BrailleCharGridArray;
+use braille::{BrailleCharUnOrdered, BrailleCharGridArray};
 
 
 fn main() {
@@ -6,7 +6,7 @@ fn main() {
 
     const W: usize = 20;
     const H: usize = 10;
-    let mut array: BrailleCharGridArray<W, H> = BrailleCharGridArray::new();
+    let mut array: BrailleCharGridArray<BrailleCharUnOrdered, W, H> = BrailleCharGridArray::new();
     let w = W * 2;
     let h = H * 4;
     for x in 0..w {

@@ -1,11 +1,13 @@
 pub mod array;
+pub mod vector;
 
-pub use array::{BrailleCharGridArray, BrailleCharGridArrayUnOrdered};
+pub use array::BrailleCharGridArray;
+pub use vector::BrailleCharGridVector;
 
 use std::ops::Range;
 
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct BrailleChar(u8);
 
 impl BrailleChar {
@@ -107,7 +109,6 @@ impl BrailleChar {
         return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
     }
 
-
     pub const fn set(&mut self, x: u8, y: u8, value: bool) {
         assert!(x < 2);
         assert!(y < 4);
@@ -123,7 +124,72 @@ impl BrailleChar {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+impl BrailleCharTrait for BrailleChar {
+    fn ordered(&self) -> u8 {
+        return Self::ordered(self);
+    }
+
+    fn unordered(&self) -> u8 {
+        return Self::unordered(self);
+    }
+
+    fn from_ordered(b: u8) -> Self {
+        return Self::from_ordered(b);
+    }
+
+    fn from_unordered(b: u8) -> Self {
+        return Self::from_unordered(b);
+    }
+
+    #[inline(always)]
+    fn u32_char(&self) -> u32 {
+        return Self::u32_char(self);
+    }
+
+    #[inline(always)]
+    fn char(&self) -> char {
+        return Self::char(self);
+    }
+
+    fn from_u32_char(char: u32) -> Option<Self> {
+        return Self::from_u32_char(char);
+    }
+
+    #[inline(always)]
+    fn from_u32_char_unchecked(char: u32) -> Self {
+        return Self::from_u32_char_unchecked(char);
+    }
+
+    #[inline(always)]
+    fn from_char(char: char) -> Option<Self> {
+        return Self::from_char(char);
+    }
+
+    #[inline(always)]
+    fn from_char_unchecked(char: char) -> Self {
+        return Self::from_char_unchecked(char);
+    }
+
+    fn get(&self, x: u8, y: u8) -> bool {
+        return Self::get(self, x, y);
+    }
+
+    #[inline(always)]
+    fn get_unchecked(&self, x: u8, y: u8) -> bool {
+        return Self::get_unchecked(self, x, y);
+    }
+
+    fn set(&mut self, x: u8, y: u8, value: bool) {
+        Self::set(self, x, y, value);
+    }
+
+    #[inline(always)]
+    fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_unchecked(self, x, y, value);
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct BrailleCharUnOrdered(u8);
 
 impl BrailleCharUnOrdered {
@@ -199,7 +265,6 @@ impl BrailleCharUnOrdered {
         return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
     }
 
-
     pub const fn set(&mut self, x: u8, y: u8, value: bool) {
         assert!(x < 2);
         assert!(y < 4);
@@ -213,5 +278,104 @@ impl BrailleCharUnOrdered {
 
         *self = Self::from_unordered(self.unordered() & !(1 << o) | (value as u8) << o);
     }
+}
+
+impl BrailleCharTrait for BrailleCharUnOrdered {
+    fn ordered(&self) -> u8 {
+        return Self::ordered(self);
+    }
+
+    fn unordered(&self) -> u8 {
+        return Self::unordered(self);
+    }
+
+    fn from_ordered(b: u8) -> Self {
+        return Self::from_ordered(b);
+    }
+
+    fn from_unordered(b: u8) -> Self {
+        return Self::from_unordered(b);
+    }
+
+    #[inline(always)]
+    fn u32_char(&self) -> u32 {
+        return Self::u32_char(self);
+    }
+
+    #[inline(always)]
+    fn char(&self) -> char {
+        return Self::char(self);
+    }
+
+    fn from_u32_char(char: u32) -> Option<Self> {
+        return Self::from_u32_char(char);
+    }
+
+    #[inline(always)]
+    fn from_u32_char_unchecked(char: u32) -> Self {
+        return Self::from_u32_char_unchecked(char);
+    }
+
+    #[inline(always)]
+    fn from_char(char: char) -> Option<Self> {
+        return Self::from_char(char);
+    }
+
+    #[inline(always)]
+    fn from_char_unchecked(char: char) -> Self {
+        return Self::from_char_unchecked(char);
+    }
+
+    fn get(&self, x: u8, y: u8) -> bool {
+        return Self::get(self, x, y);
+    }
+
+    #[inline(always)]
+    fn get_unchecked(&self, x: u8, y: u8) -> bool {
+        return Self::get_unchecked(self, x, y);
+    }
+
+    fn set(&mut self, x: u8, y: u8, value: bool) {
+        Self::set(self, x, y, value);
+    }
+
+    #[inline(always)]
+    fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_unchecked(self, x, y, value);
+    }
+}
+
+pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug {
+    const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
+    const WIDTH: usize = 2;
+    const HEIGHT: usize = 4;
+
+    fn ordered(&self) -> u8;
+
+    fn unordered(&self) -> u8;
+
+    fn from_ordered(b: u8) -> Self;
+
+    fn from_unordered(b: u8) -> Self;
+
+    fn u32_char(&self) -> u32;
+
+    fn char(&self) -> char;
+
+    fn from_u32_char(char: u32) -> Option<Self>;
+
+    fn from_u32_char_unchecked(char: u32) -> Self;
+
+    fn from_char(char: char) -> Option<Self>;
+
+    fn from_char_unchecked(char: char) -> Self;
+
+    fn get(&self, x: u8, y: u8) -> bool;
+
+    fn get_unchecked(&self, x: u8, y: u8) -> bool;
+
+    fn set(&mut self, x: u8, y: u8, value: bool);
+
+    fn set_unchecked(&mut self, x: u8, y: u8, value: bool);
 }
 

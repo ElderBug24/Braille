@@ -1,4 +1,6 @@
-use braille::BrailleCharGridArrayUnOrdered;
+use std::env;
+
+use braille::{BrailleCharUnOrdered, BrailleCharGridVector};
 
 use glam::Vec3;
 
@@ -54,117 +56,76 @@ impl Buffer {
     }
 }
 
+fn dither_img(file: &str) {
+    let mut img = Buffer::from_file(file);
+    let (w, h) = img.dimensions();
+
+    let mut array: BrailleCharGridVector<BrailleCharUnOrdered> = BrailleCharGridVector::new(w/2, h/4);
+
+    for y in 0..h {
+        for x in 0..w {
+            let pixel = img.get(x, y);
+            let l = pixel.element_sum() /  3.0;
+            img.set(x, y, Vec3::splat(l));
+        }
+    }
+
+    for y in 0..(h/4*4) {
+        for x in 0..(w/2*2) {
+            let oldpixel = img.get(x, y).clamp(Vec3::ZERO, Vec3::splat(255.0));
+
+            let (b, nl) = match oldpixel.x {
+                0.0..127.0 => (false, 0.0),
+                _ => (true, 255.0)
+            };
+            let newpixel = Vec3::splat(nl);
+
+            array.set(x, y, b);
+
+            let quant_error = oldpixel - newpixel;
+
+            let right = x + 1 < w;
+            let down  = y + 1 < h;
+            let left  = x > 0;
+
+            if right {
+                *img.get_mut(x+1, y) += quant_error * 7.0/ 16.0;
+            }
+            if down {
+                if left {
+                    *img.get_mut(x-1, y+1) += quant_error * 3.0/ 16.0;
+                }
+                *img.get_mut(x, y+1) += quant_error * 5.0 / 16.0;
+                if right {
+                    *img.get_mut(x+1, y+1) += quant_error * 1.0/ 16.0;
+                }
+            }
+        }
+    }
+
+    for y in 0..(h/4) {
+        for x in 0..(w/2) {
+            print!("{}", array.get_char_unchecked(x, y).char());
+        }
+        println!();
+    }
+}
+
 fn main() {
-    let mut img = Buffer::from_file("assets/cat.png");
-    let (w, h) = img.dimensions();
+    let args: Vec<String> = env::args().skip(1).collect();
 
-    assert_eq!(400, w);
-    assert_eq!(400, h);
+    let values = if args.is_empty() {
+        vec![
+            String::from("assets/cat.png"),
+            String::from("assets/car.png"),
+            String::from("assets/bunny.png")
+        ]
+    } else {
+        args
+    };
 
-    let mut array: BrailleCharGridArrayUnOrdered<200, 100> = BrailleCharGridArrayUnOrdered::new();
-
-    for y in 0..h {
-        for x in 0..w {
-            let pixel = img.get(x, y);
-            let l = pixel.element_sum() /  3.0;
-            img.set(x, y, Vec3::splat(l));
-        }
-    }
-
-    for y in 0..h {
-        for x in 0..w {
-            let oldpixel = img.get(x, y).clamp(Vec3::ZERO, Vec3::splat(255.0));
-
-            let (b, nl) = match oldpixel.x {
-                0.0..127.0 => (false, 0.0),
-                _ => (true, 255.0)
-            };
-            let newpixel = Vec3::splat(nl);
-
-            array.set(x, y, b);
-
-            let quant_error = oldpixel - newpixel;
-
-            let right = x + 1 < w;
-            let down  = y + 1 < h;
-            let left  = x > 0;
-
-            if right {
-                *img.get_mut(x+1, y) += quant_error * 7.0/ 16.0;
-            }
-            if down {
-                if left {
-                    *img.get_mut(x-1, y+1) += quant_error * 3.0/ 16.0;
-                }
-                *img.get_mut(x, y+1) += quant_error * 5.0 / 16.0;
-                if right {
-                    *img.get_mut(x+1, y+1) += quant_error * 1.0/ 16.0;
-                }
-            }
-        }
-    }
-
-    for y in 0..100 {
-        for x in 0..200 {
-            print!("{}", array.get_char_unchecked(x, y).char());
-        }
-        println!();
-    }
-
-    let mut img = Buffer::from_file("assets/car.png");
-    let (w, h) = img.dimensions();
-
-    assert_eq!(400, w);
-    assert_eq!(200, h);
-
-    let mut array: BrailleCharGridArrayUnOrdered<200, 50> = BrailleCharGridArrayUnOrdered::new();
-
-    for y in 0..h {
-        for x in 0..w {
-            let pixel = img.get(x, y);
-            let l = pixel.element_sum() /  3.0;
-            img.set(x, y, Vec3::splat(l));
-        }
-    }
-
-    for y in 0..h {
-        for x in 0..w {
-            let oldpixel = img.get(x, y).clamp(Vec3::ZERO, Vec3::splat(255.0));
-
-            let (b, nl) = match oldpixel.x {
-                0.0..127.0 => (false, 0.0),
-                _ => (true, 255.0)
-            };
-            let newpixel = Vec3::splat(nl);
-
-            array.set(x, y, b);
-
-            let quant_error = oldpixel - newpixel;
-
-            let right = x + 1 < w;
-            let down  = y + 1 < h;
-            let left  = x > 0;
-
-            if right {
-                *img.get_mut(x+1, y) += quant_error * 7.0/ 16.0;
-            }
-            if down {
-                if left {
-                    *img.get_mut(x-1, y+1) += quant_error * 3.0/ 16.0;
-                }
-                *img.get_mut(x, y+1) += quant_error * 5.0 / 16.0;
-                if right {
-                    *img.get_mut(x+1, y+1) += quant_error * 1.0/ 16.0;
-                }
-            }
-        }
-    }
-
-    for y in 0..50 {
-        for x in 0..200 {
-            print!("{}", array.get_char_unchecked(x, y).char());
-        }
-        println!();
+    for arg in values {
+        dither_img(&arg);
     }
 }
 
