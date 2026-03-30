@@ -52,6 +52,33 @@ fn unordered_ordered() {
 }
 
 #[test]
+fn unordered_from_array() {
+    let array = [true, true, true, false, true, false, true, true];
+
+    let char = BrailleChar::from_array_unordered(array);
+
+    assert_eq!(BYTE_A_UNORDERED, char.unordered());
+    assert_eq!(BYTE_A_ORDERED, char.ordered());
+}
+
+#[test]
+fn unordered_from_slice() {
+    let array = [true, true, true, false, true, false, true, true];
+
+    let char = BrailleChar::from_slice_unordered(&array);
+
+    assert_eq!(BYTE_A_UNORDERED, char.unordered());
+    assert_eq!(BYTE_A_ORDERED, char.ordered());
+
+    let array = [true, true, true, false, true];
+
+    let char = BrailleChar::from_slice_unordered(&array);
+
+    assert_eq!(BYTE_A_UNORDERED & 0b_1111_1100, char.unordered());
+    assert_eq!(BYTE_A_ORDERED & 0b_0001_1111, char.ordered());
+}
+
+#[test]
 fn from_char() {
     let char = BrailleChar::from_char(CHAR_A);
 
