@@ -52,7 +52,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         assert!(x < self.width());
         assert!(y < self.height());
 
-        return self.array[index(y, x, self.columns)];
+        return self.array[index(x, y, self.columns)];
     }
 
     pub fn get_char_unchecked(&self, x: usize, y: usize) -> T {
