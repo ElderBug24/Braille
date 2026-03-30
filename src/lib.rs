@@ -379,3 +379,39 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
     fn set_unchecked(&mut self, x: u8, y: u8, value: bool);
 }
 
+impl From<BrailleCharUnOrdered> for BrailleChar {
+    fn from(value: BrailleCharUnOrdered) -> Self {
+        return Self::from_unordered(value.unordered());
+    }
+}
+
+impl From<BrailleChar> for BrailleCharUnOrdered {
+    fn from(value: BrailleChar) -> Self {
+        return Self::from_ordered(value.ordered());
+    }
+}
+
+impl Into<char> for BrailleChar {
+    fn into(self) -> char {
+        return self.char();
+    }
+}
+
+impl Into<char> for BrailleCharUnOrdered {
+    fn into(self) -> char {
+        return self.char();
+    }
+}
+
+impl Into<u32> for BrailleChar {
+    fn into(self) -> u32 {
+        return self.u32_char();
+    }
+}
+
+impl Into<u32> for BrailleCharUnOrdered {
+    fn into(self) -> u32 {
+        return self.u32_char();
+    }
+}
+
