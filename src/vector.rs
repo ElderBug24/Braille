@@ -11,7 +11,7 @@ pub struct BrailleCharGridVector<T: BrailleCharTrait> {
 impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
     pub fn new(columns: usize, rows: usize) -> Self {
         return Self {
-            array: vec![T::from_ordered(0u8); columns * rows],
+            array: vec![T::ZERO; columns * rows],
             columns: columns,
             rows: rows
         };
@@ -94,6 +94,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
     }
 }
 
+#[inline(always)]
 const fn index(x: usize, y: usize, width: usize) -> usize {
     return x + y * width;
 }

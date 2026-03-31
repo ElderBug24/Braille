@@ -1,4 +1,4 @@
-use braille::BrailleChar;
+use braille::*;
 
 use std::io::{self, Write};
 
