@@ -92,6 +92,32 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
     pub fn set_char_unchecked(&mut self, x: usize, y: usize, value: T) {
         self.array[index(x, y, self.columns)] = value;
     }
+
+    pub fn resize(&mut self, columns: usize, rows: usize, value: T, (x, y): (isize, isize)) {
+        let mut grid = vec![value; columns * rows];
+
+        std::mem::swap(&mut self.array, &mut grid);
+
+        let a = x.max(0) as usize;
+        let b = y.max(0) as usize;
+        let c = (columns as isize + x).clamp(0, self.columns as isize) as usize;
+        let d = (rows as isize + y).clamp(0, self.rows as isize) as usize;
+
+        let w = c - a;
+        let h = d - b;
+
+        let a_ = (-x).max(0) as usize;
+        let b_ = (-y).max(0) as usize;
+
+        for j in 0..h {
+            let slice = &grid[index(a, b + j, self.columns)..index(c, b + j, self.columns)];
+
+            self.array[index(a_, b_ + j, columns)..index(a_ + w, b_ + j, columns)].copy_from_slice(slice);
+        }
+
+        self.columns = columns;
+        self.rows = rows;
+    }
 }
 
 #[inline(always)]
