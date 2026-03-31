@@ -33,20 +33,50 @@ pub const fn ordered_to_unordered(b: u8) -> u8 {
     return b;
 }
 
-pub const fn array_to_byte(array: [bool; 8]) -> u8 {
-    let mut byte = 0u8;
+pub const fn byte_to_array(b: u8) -> [bool; 8] {
+    return [
+        ((b & 0b_1000_0000) >> 7) != 0,
+        ((b & 0b_0100_0000) >> 6) != 0,
+        ((b & 0b_0010_0000) >> 5) != 0,
+        ((b & 0b_0001_0000) >> 4) != 0,
+        ((b & 0b_0000_1000) >> 3) != 0,
+        ((b & 0b_0000_0100) >> 2) != 0,
+        ((b & 0b_0000_0010) >> 1) != 0,
+         (b & 0b_0000_0001) != 0
+    ];
+}
 
-    let mut i = 0;
+pub const fn array_to_byte(array: &[bool; 8]) -> u8 {
+    return (array[0] as u8) << 7
+         | (array[1] as u8) << 6
+         | (array[2] as u8) << 5
+         | (array[3] as u8) << 4
+         | (array[4] as u8) << 3
+         | (array[5] as u8) << 2
+         | (array[6] as u8) << 1
+         | (array[7] as u8);
+}
 
-    while i < 8 {
-        let b = array[i];
+pub const fn array_ordered_to_byte_unordered(array: &[bool; 8]) -> u8 {
+    return (array[0] as u8)
+         | (array[1] as u8) << 1
+         | (array[2] as u8) << 2
+         | (array[3] as u8) << 4
+         | (array[4] as u8) << 6
+         | (array[5] as u8) << 3
+         | (array[6] as u8) << 5
+         | (array[7] as u8) << 7;
+}
 
-        byte |= (b as u8) << (7 - i);
-
-        i += 1;
-    }
-
-    return byte;
+pub const fn array_unordered_to_byte_ordered(array: &[bool; 8]) -> u8 {
+    return (array[0] as u8)
+         | (array[1] as u8) << 3
+         | (array[2] as u8) << 1
+         | (array[3] as u8) << 4
+         | (array[4] as u8) << 2
+         | (array[5] as u8) << 5
+         | (array[6] as u8) << 6
+         | (array[7] as u8) << 7;
 }
 
 pub const fn slice_to_byte(slice: &[bool]) -> u8 {
@@ -66,10 +96,51 @@ pub const fn slice_to_byte(slice: &[bool]) -> u8 {
     return byte;
 }
 
+pub const fn slice_ordered_to_byte_unordered(slice: &[bool]) -> u8 {
+    const OFFSET: [usize; 8] = [0, 1, 2, 4, 6, 3, 5, 7];
+
+    let mut byte = 0u8;
+
+    let len = slice.len();
+    let mut i = 0;
+
+    while i < len {
+        let b = slice[i];
+
+        let o = OFFSET[i];
+        byte |= (b as u8) << o;
+
+        i += 1;
+    }
+
+    return byte;
+}
+
+pub const fn slice_unordered_to_byte_ordered(slice: &[bool]) -> u8 {
+    const OFFSET: [usize; 8] = [0, 3, 1, 4, 2, 5, 6, 7];
+
+    let mut byte = 0u8;
+
+    let len = slice.len();
+    let mut i = 0;
+
+    while i < len {
+        let b = slice[i];
+
+        let o = OFFSET[i];
+        byte |= (b as u8) << o;
+
+        i += 1;
+    }
+
+    return byte;
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct BrailleChar(u8);
 
 impl BrailleChar {
+    pub const ZERO: Self = Self(0u8);
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const WIDTH: usize = 2;
     pub const HEIGHT: usize = 4;
@@ -95,16 +166,28 @@ impl BrailleChar {
         return Self(b);
     }
 
-    pub const fn from_array_unordered(array: [bool; 8]) -> Self {
-        let byte = array_to_byte(array);
+    pub const fn from_array_ordered(array: [bool; 8]) -> Self {
+        let byte = array_to_byte(&array);
 
-        return Self::from_unordered(byte);
+        return Self::from_ordered(byte);
+    }
+
+    pub const fn from_array_unordered(array: [bool; 8]) -> Self {
+        let byte = array_unordered_to_byte_ordered(&array);
+
+        return Self::from_ordered(byte);
+    }
+
+    pub const fn from_slice_ordered(slice: &[bool]) -> Self {
+        let byte = slice_to_byte(slice);
+
+        return Self::from_ordered(byte);
     }
 
     pub const fn from_slice_unordered(slice: &[bool]) -> Self {
-        let byte = slice_to_byte(slice);
+        let byte = slice_unordered_to_byte_ordered(slice);
 
-        return Self::from_unordered(byte);
+        return Self::from_ordered(byte);
     }
 
     #[inline(always)]
@@ -170,6 +253,8 @@ impl BrailleChar {
 }
 
 impl BrailleCharTrait for BrailleChar {
+    const ZERO: Self = Self::ZERO;
+
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
     }
@@ -186,8 +271,16 @@ impl BrailleCharTrait for BrailleChar {
         return Self::from_unordered(b);
     }
 
+    fn from_array_ordered(array: [bool; 8]) -> Self {
+        return Self::from_array_ordered(array);
+    }
+
     fn from_array_unordered(array: [bool; 8]) -> Self {
         return Self::from_array_unordered(array);
+    }
+
+    fn from_slice_ordered(slice: &[bool]) -> Self {
+        return Self::from_slice_ordered(slice);
     }
 
     fn from_slice_unordered(slice: &[bool]) -> Self {
@@ -246,6 +339,7 @@ impl BrailleCharTrait for BrailleChar {
 pub struct BrailleCharUnOrdered(u8);
 
 impl BrailleCharUnOrdered {
+    pub const ZERO: Self = Self(0u8);
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const WIDTH: usize = 2;
     pub const HEIGHT: usize = 4;
@@ -271,8 +365,20 @@ impl BrailleCharUnOrdered {
         return Self(b);
     }
 
+    pub const fn from_array_ordered(array: [bool; 8]) -> Self {
+        let byte = array_ordered_to_byte_unordered(&array);
+
+        return Self::from_unordered(byte);
+    }
+
     pub const fn from_array_unordered(array: [bool; 8]) -> Self {
-        let byte = array_to_byte(array);
+        let byte = array_to_byte(&array);
+
+        return Self::from_unordered(byte);
+    }
+
+    pub const fn from_slice_ordered(slice: &[bool]) -> Self {
+        let byte = slice_ordered_to_byte_unordered(slice);
 
         return Self::from_unordered(byte);
     }
@@ -346,6 +452,8 @@ impl BrailleCharUnOrdered {
 }
 
 impl BrailleCharTrait for BrailleCharUnOrdered {
+    const ZERO: Self = Self::ZERO;
+
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
     }
@@ -362,8 +470,16 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
         return Self::from_unordered(b);
     }
 
+    fn from_array_ordered(array: [bool; 8]) -> Self {
+        return Self::from_array_ordered(array);
+    }
+
     fn from_array_unordered(array: [bool; 8]) -> Self {
         return Self::from_array_unordered(array);
+    }
+
+    fn from_slice_ordered(slice: &[bool]) -> Self {
+        return Self::from_slice_ordered(slice);
     }
 
     fn from_slice_unordered(slice: &[bool]) -> Self {
@@ -419,6 +535,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
 }
 
 pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug {
+    const ZERO: Self;
     const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     const WIDTH: usize = 2;
     const HEIGHT: usize = 4;
@@ -431,7 +548,11 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 
     fn from_unordered(b: u8) -> Self;
 
+    fn from_array_ordered(array: [bool; 8]) -> Self;
+
     fn from_array_unordered(array: [bool; 8]) -> Self;
+
+    fn from_slice_ordered(slice: &[bool]) -> Self;
 
     fn from_slice_unordered(slice: &[bool]) -> Self;
 
