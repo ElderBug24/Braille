@@ -44,15 +44,15 @@ impl<T: BrailleCharTrait, const COLUMNS: usize, const ROWS: usize> BrailleCharGr
         return self.array[r][c].get_unchecked(c_ as u8, r_ as u8);
     }
 
-    pub const fn get_char(&self, x: usize, y: usize) -> T {
+    pub const fn get_char(&self, x: usize, y: usize) -> &T {
         assert!(x < COLUMNS * 2);
         assert!(y < ROWS * 4);
 
-        return self.array[y][x];
+        return &self.array[y][x];
     }
 
-    pub const fn get_char_unchecked(&self, x: usize, y: usize) -> T {
-        return self.array[y][x];
+    pub const fn get_char_unchecked(&self, x: usize, y: usize) -> &T {
+        return &self.array[y][x];
     }
 
     pub fn set(&mut self, x: usize, y: usize, value: bool) {
@@ -87,6 +87,17 @@ impl<T: BrailleCharTrait, const COLUMNS: usize, const ROWS: usize> BrailleCharGr
 
     pub const fn set_char_unchecked(&mut self, x: usize, y: usize, value: T) {
         self.array[y][x] = value;
+    }
+
+    pub const fn get_char_mut(&mut self, x: usize, y: usize) -> &mut T {
+        assert!(x < COLUMNS * 2);
+        assert!(y < ROWS * 4);
+
+        return &mut self.array[y][x];
+    }
+
+    pub const fn get_char_mut_unchecked(&mut self, x: usize, y: usize) -> &mut T {
+        return &mut self.array[y][x];
     }
 }
 

@@ -48,15 +48,15 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         return self.array[index(c, r, self.width())].get_unchecked(c_ as u8, r_ as u8);
     }
 
-    pub fn get_char(&self, x: usize, y: usize) -> T {
+    pub fn get_char(&self, x: usize, y: usize) -> &T {
         assert!(x < self.width());
         assert!(y < self.height());
 
-        return self.array[index(x, y, self.columns)];
+        return &self.array[index(x, y, self.columns)];
     }
 
-    pub fn get_char_unchecked(&self, x: usize, y: usize) -> T {
-        return self.array[index(x, y, self.columns)];
+    pub fn get_char_unchecked(&self, x: usize, y: usize) -> &T {
+        return &self.array[index(x, y, self.columns)];
     }
 
     pub fn set(&mut self, x: usize, y: usize, value: bool) {
@@ -94,6 +94,17 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
     }
 
     pub fn resize(&mut self, columns: usize, rows: usize, value: T, (x, y): (isize, isize)) {
+    pub fn get_char_mut(&mut self, x: usize, y: usize) -> &mut T {
+        assert!(x < self.width());
+        assert!(y < self.height());
+
+        return &mut self.array[index(x, y, self.columns)];
+    }
+
+    pub fn get_char_mut_unchecked(&mut self, x: usize, y: usize) -> &mut T {
+        return &mut self.array[index(x, y, self.columns)];
+    }
+
         let mut grid = vec![value; columns * rows];
 
         std::mem::swap(&mut self.array, &mut grid);
