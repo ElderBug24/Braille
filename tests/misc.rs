@@ -2,6 +2,7 @@ use braille::{byte_to_array, array_to_byte};
 
 
 #[test]
+#[allow(non_snake_case)]
 fn byte_to_array_() {
     let a = 0b_1111_0000;
     let b = 0b_1010_1011;
@@ -17,6 +18,7 @@ fn byte_to_array_() {
 }
 
 #[test]
+#[allow(non_snake_case)]
 fn array_to_byte_() {
     let A = [true, true, true, true, false, false, false, false];
     let B = [true, false, true, false, true, false, true, true];
