@@ -140,7 +140,8 @@ pub const fn slice_unordered_to_byte_ordered(slice: &[bool]) -> u8 {
 pub struct BrailleChar(u8);
 
 impl BrailleChar {
-    pub const ZERO: Self = Self(0u8);
+    pub const EMPTY: Self = Self(0u8);
+    pub const FULL: Self = Self(255u8);
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const WIDTH: usize = 2;
     pub const HEIGHT: usize = 4;
@@ -253,7 +254,8 @@ impl BrailleChar {
 }
 
 impl BrailleCharTrait for BrailleChar {
-    const ZERO: Self = Self::ZERO;
+    const EMPTY: Self = Self::EMPTY;
+    const FULL: Self = Self::FULL;
 
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
@@ -339,7 +341,8 @@ impl BrailleCharTrait for BrailleChar {
 pub struct BrailleCharUnOrdered(u8);
 
 impl BrailleCharUnOrdered {
-    pub const ZERO: Self = Self(0u8);
+    pub const EMPTY: Self = Self(0u8);
+    pub const FULL: Self = Self(255u8);
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const WIDTH: usize = 2;
     pub const HEIGHT: usize = 4;
@@ -452,7 +455,8 @@ impl BrailleCharUnOrdered {
 }
 
 impl BrailleCharTrait for BrailleCharUnOrdered {
-    const ZERO: Self = Self::ZERO;
+    const EMPTY: Self = Self::EMPTY;
+    const FULL: Self = Self::FULL;
 
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
@@ -535,7 +539,8 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
 }
 
 pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug {
-    const ZERO: Self;
+    const EMPTY: Self;
+    const FULL: Self;
     const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     const WIDTH: usize = 2;
     const HEIGHT: usize = 4;

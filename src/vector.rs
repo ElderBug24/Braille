@@ -4,14 +4,14 @@ use crate::BrailleCharTrait;
 #[derive(Clone, Debug)]
 pub struct BrailleCharGridVector<T: BrailleCharTrait> {
     pub array: Vec<T>,
-    pub columns: usize,
+    pub columns: usize, // make private
     pub rows: usize
 }
 
 impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
     pub fn new(columns: usize, rows: usize) -> Self {
         return Self {
-            array: vec![T::ZERO; columns * rows],
+            array: vec![T::EMPTY; columns * rows],
             columns: columns,
             rows: rows
         };
@@ -93,7 +93,6 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         self.array[index(x, y, self.columns)] = value;
     }
 
-    pub fn resize(&mut self, columns: usize, rows: usize, value: T, (x, y): (isize, isize)) {
     pub fn get_char_mut(&mut self, x: usize, y: usize) -> &mut T {
         assert!(x < self.width());
         assert!(y < self.height());
@@ -105,6 +104,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         return &mut self.array[index(x, y, self.columns)];
     }
 
+    pub fn resize(&mut self, columns: usize, rows: usize, (x, y): (isize, isize), value: T) {
         let mut grid = vec![value; columns * rows];
 
         std::mem::swap(&mut self.array, &mut grid);

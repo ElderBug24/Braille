@@ -9,7 +9,7 @@ pub struct BrailleCharGridArray<T: BrailleCharTrait, const COLUMNS: usize, const
 impl<T: BrailleCharTrait, const COLUMNS: usize, const ROWS: usize> BrailleCharGridArray<T, COLUMNS, ROWS> {
     pub fn new() -> Self {
         return Self {
-            array: [[T::ZERO; COLUMNS]; ROWS]
+            array: [[T::EMPTY; COLUMNS]; ROWS]
         };
     }
 
