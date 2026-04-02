@@ -7,6 +7,7 @@ pub use vector::BrailleCharGridVector;
 use std::ops::Range;
 
 
+#[inline(always)]
 pub const fn unordered_to_ordered(b: u8) -> u8 {
     let b = b & 0b_0001_0000
         |  (b & 0b_1000_0000) >> 7
@@ -20,6 +21,7 @@ pub const fn unordered_to_ordered(b: u8) -> u8 {
     return b;
 }
 
+#[inline(always)]
 pub const fn ordered_to_unordered(b: u8) -> u8 {
     let b = b & 0b_0001_0000
         |  (b & 0b_1000_0000) >> 7
@@ -33,6 +35,7 @@ pub const fn ordered_to_unordered(b: u8) -> u8 {
     return b;
 }
 
+#[inline(always)]
 pub const fn byte_to_array(b: u8) -> [bool; 8] {
     return [
         ((b & 0b_1000_0000) >> 7) != 0,
@@ -46,6 +49,7 @@ pub const fn byte_to_array(b: u8) -> [bool; 8] {
     ];
 }
 
+#[inline(always)]
 pub const fn array_to_byte(array: &[bool; 8]) -> u8 {
     return (array[0] as u8) << 7
          | (array[1] as u8) << 6
@@ -57,6 +61,7 @@ pub const fn array_to_byte(array: &[bool; 8]) -> u8 {
          | (array[7] as u8);
 }
 
+#[inline(always)]
 pub const fn array_ordered_to_byte_unordered(array: &[bool; 8]) -> u8 {
     return (array[0] as u8)
          | (array[1] as u8) << 1
@@ -68,6 +73,7 @@ pub const fn array_ordered_to_byte_unordered(array: &[bool; 8]) -> u8 {
          | (array[7] as u8) << 7;
 }
 
+#[inline(always)]
 pub const fn array_unordered_to_byte_ordered(array: &[bool; 8]) -> u8 {
     return (array[0] as u8)
          | (array[1] as u8) << 3
@@ -79,6 +85,7 @@ pub const fn array_unordered_to_byte_ordered(array: &[bool; 8]) -> u8 {
          | (array[7] as u8) << 7;
 }
 
+#[inline(always)]
 pub const fn slice_to_byte(slice: &[bool]) -> u8 {
     let mut byte = 0u8;
 
@@ -96,6 +103,7 @@ pub const fn slice_to_byte(slice: &[bool]) -> u8 {
     return byte;
 }
 
+#[inline(always)]
 pub const fn slice_ordered_to_byte_unordered(slice: &[bool]) -> u8 {
     const OFFSET: [usize; 8] = [0, 1, 2, 4, 6, 3, 5, 7];
 
@@ -116,6 +124,7 @@ pub const fn slice_ordered_to_byte_unordered(slice: &[bool]) -> u8 {
     return byte;
 }
 
+#[inline(always)]
 pub const fn slice_unordered_to_byte_ordered(slice: &[bool]) -> u8 {
     const OFFSET: [usize; 8] = [0, 3, 1, 4, 2, 5, 6, 7];
 
@@ -146,6 +155,7 @@ impl BrailleChar {
     pub const WIDTH: usize = 2;
     pub const HEIGHT: usize = 4;
 
+    #[inline(always)]
     pub const fn ordered(&self) -> u8 {
         return self.0;
     }
@@ -157,6 +167,7 @@ impl BrailleChar {
         return b;
     }
 
+    #[inline(always)]
     pub const fn from_ordered(b: u8) -> Self {
         return Self(b);
     }
@@ -206,7 +217,7 @@ impl BrailleChar {
         const MAX: u32 = BrailleChar::CHAR_RANGE.end;
 
         return match char {
-            MIN..MAX => Some(Self::from_ordered((char - Self::CHAR_RANGE.start) as u8)),
+            MIN..MAX => Some(Self::from_u32_char_unchecked(char)),
             _ => None
         };
     }
@@ -257,34 +268,42 @@ impl BrailleCharTrait for BrailleChar {
     const EMPTY: Self = Self::EMPTY;
     const FULL: Self = Self::FULL;
 
+    #[inline(always)]
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
     }
 
+    #[inline(always)]
     fn unordered(&self) -> u8 {
         return Self::unordered(self);
     }
 
+    #[inline(always)]
     fn from_ordered(b: u8) -> Self {
         return Self::from_ordered(b);
     }
 
+    #[inline(always)]
     fn from_unordered(b: u8) -> Self {
         return Self::from_unordered(b);
     }
 
+    #[inline(always)]
     fn from_array_ordered(array: [bool; 8]) -> Self {
         return Self::from_array_ordered(array);
     }
 
+    #[inline(always)]
     fn from_array_unordered(array: [bool; 8]) -> Self {
         return Self::from_array_unordered(array);
     }
 
+    #[inline(always)]
     fn from_slice_ordered(slice: &[bool]) -> Self {
         return Self::from_slice_ordered(slice);
     }
 
+    #[inline(always)]
     fn from_slice_unordered(slice: &[bool]) -> Self {
         return Self::from_slice_unordered(slice);
     }
@@ -299,6 +318,7 @@ impl BrailleCharTrait for BrailleChar {
         return Self::char(self);
     }
 
+    #[inline(always)]
     fn from_u32_char(char: u32) -> Option<Self> {
         return Self::from_u32_char(char);
     }
@@ -318,6 +338,7 @@ impl BrailleCharTrait for BrailleChar {
         return Self::from_char_unchecked(char);
     }
 
+    #[inline(always)]
     fn get(&self, x: u8, y: u8) -> bool {
         return Self::get(self, x, y);
     }
@@ -327,6 +348,7 @@ impl BrailleCharTrait for BrailleChar {
         return Self::get_unchecked(self, x, y);
     }
 
+    #[inline(always)]
     fn set(&mut self, x: u8, y: u8, value: bool) {
         Self::set(self, x, y, value);
     }
@@ -354,6 +376,7 @@ impl BrailleCharUnOrdered {
         return b;
     }
 
+    #[inline(always)]
     pub const fn unordered(&self) -> u8 {
         return self.0;
     }
@@ -364,6 +387,7 @@ impl BrailleCharUnOrdered {
         return Self(b);
     }
 
+    #[inline(always)]
     pub const fn from_unordered(b: u8) -> Self {
         return Self(b);
     }
@@ -407,7 +431,7 @@ impl BrailleCharUnOrdered {
         const MAX: u32 = BrailleChar::CHAR_RANGE.end;
 
         return match char {
-            MIN..MAX => Some(Self::from_ordered((char - Self::CHAR_RANGE.start) as u8)),
+            MIN..MAX => Some(Self::from_u32_char_unchecked(char)),
             _ => None
         };
     }
@@ -458,34 +482,42 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     const EMPTY: Self = Self::EMPTY;
     const FULL: Self = Self::FULL;
 
+    #[inline(always)]
     fn ordered(&self) -> u8 {
         return Self::ordered(self);
     }
 
+    #[inline(always)]
     fn unordered(&self) -> u8 {
         return Self::unordered(self);
     }
 
+    #[inline(always)]
     fn from_ordered(b: u8) -> Self {
         return Self::from_ordered(b);
     }
 
+    #[inline(always)]
     fn from_unordered(b: u8) -> Self {
         return Self::from_unordered(b);
     }
 
+    #[inline(always)]
     fn from_array_ordered(array: [bool; 8]) -> Self {
         return Self::from_array_ordered(array);
     }
 
+    #[inline(always)]
     fn from_array_unordered(array: [bool; 8]) -> Self {
         return Self::from_array_unordered(array);
     }
 
+    #[inline(always)]
     fn from_slice_ordered(slice: &[bool]) -> Self {
         return Self::from_slice_ordered(slice);
     }
 
+    #[inline(always)]
     fn from_slice_unordered(slice: &[bool]) -> Self {
         return Self::from_slice_unordered(slice);
     }
@@ -500,6 +532,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
         return Self::char(self);
     }
 
+    #[inline(always)]
     fn from_u32_char(char: u32) -> Option<Self> {
         return Self::from_u32_char(char);
     }
@@ -519,6 +552,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
         return Self::from_char_unchecked(char);
     }
 
+    #[inline(always)]
     fn get(&self, x: u8, y: u8) -> bool {
         return Self::get(self, x, y);
     }
@@ -528,6 +562,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
         return Self::get_unchecked(self, x, y);
     }
 
+    #[inline(always)]
     fn set(&mut self, x: u8, y: u8, value: bool) {
         Self::set(self, x, y, value);
     }
@@ -583,36 +618,42 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 }
 
 impl From<BrailleCharUnOrdered> for BrailleChar {
+    #[inline(always)]
     fn from(value: BrailleCharUnOrdered) -> Self {
         return Self::from_unordered(value.unordered());
     }
 }
 
 impl From<BrailleChar> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn from(value: BrailleChar) -> Self {
         return Self::from_ordered(value.ordered());
     }
 }
 
 impl Into<char> for BrailleChar {
+    #[inline(always)]
     fn into(self) -> char {
         return self.char();
     }
 }
 
 impl Into<char> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn into(self) -> char {
         return self.char();
     }
 }
 
 impl Into<u32> for BrailleChar {
+    #[inline(always)]
     fn into(self) -> u32 {
         return self.u32_char();
     }
 }
 
 impl Into<u32> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn into(self) -> u32 {
         return self.u32_char();
     }
