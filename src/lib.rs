@@ -178,14 +178,14 @@ impl BrailleChar {
         return Self(b);
     }
 
-    pub const fn from_array_ordered(array: [bool; 8]) -> Self {
-        let byte = array_to_byte(&array);
+    pub const fn from_array_ordered(array: &[bool; 8]) -> Self {
+        let byte = array_to_byte(array);
 
         return Self::from_ordered(byte);
     }
 
-    pub const fn from_array_unordered(array: [bool; 8]) -> Self {
-        let byte = array_unordered_to_byte_ordered(&array);
+    pub const fn from_array_unordered(array: &[bool; 8]) -> Self {
+        let byte = array_unordered_to_byte_ordered(array);
 
         return Self::from_ordered(byte);
     }
@@ -289,12 +289,12 @@ impl BrailleCharTrait for BrailleChar {
     }
 
     #[inline(always)]
-    fn from_array_ordered(array: [bool; 8]) -> Self {
+    fn from_array_ordered(array: &[bool; 8]) -> Self {
         return Self::from_array_ordered(array);
     }
 
     #[inline(always)]
-    fn from_array_unordered(array: [bool; 8]) -> Self {
+    fn from_array_unordered(array: &[bool; 8]) -> Self {
         return Self::from_array_unordered(array);
     }
 
@@ -392,14 +392,14 @@ impl BrailleCharUnOrdered {
         return Self(b);
     }
 
-    pub const fn from_array_ordered(array: [bool; 8]) -> Self {
-        let byte = array_ordered_to_byte_unordered(&array);
+    pub const fn from_array_ordered(array: &[bool; 8]) -> Self {
+        let byte = array_ordered_to_byte_unordered(array);
 
         return Self::from_unordered(byte);
     }
 
-    pub const fn from_array_unordered(array: [bool; 8]) -> Self {
-        let byte = array_to_byte(&array);
+    pub const fn from_array_unordered(array: &[bool; 8]) -> Self {
+        let byte = array_to_byte(array);
 
         return Self::from_unordered(byte);
     }
@@ -503,12 +503,12 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     }
 
     #[inline(always)]
-    fn from_array_ordered(array: [bool; 8]) -> Self {
+    fn from_array_ordered(array: &[bool; 8]) -> Self {
         return Self::from_array_ordered(array);
     }
 
     #[inline(always)]
-    fn from_array_unordered(array: [bool; 8]) -> Self {
+    fn from_array_unordered(array: &[bool; 8]) -> Self {
         return Self::from_array_unordered(array);
     }
 
@@ -588,9 +588,9 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 
     fn from_unordered(b: u8) -> Self;
 
-    fn from_array_ordered(array: [bool; 8]) -> Self;
+    fn from_array_ordered(array: &[bool; 8]) -> Self;
 
-    fn from_array_unordered(array: [bool; 8]) -> Self;
+    fn from_array_unordered(array: &[bool; 8]) -> Self;
 
     fn from_slice_ordered(slice: &[bool]) -> Self;
 
