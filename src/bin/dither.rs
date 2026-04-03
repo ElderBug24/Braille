@@ -105,7 +105,7 @@ fn dither_img(file: &str) {
 
     for y in 0..(h/4) {
         for x in 0..(w/2) {
-            print!("{}", array.get_char_unchecked(x, y).char());
+            print!("{}", unsafe { array.get_char_unchecked(x, y).char() });
         }
         println!();
     }

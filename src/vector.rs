@@ -35,17 +35,17 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         let r = y.div_euclid(4);
         let r_ = y - r * 4;
 
-        return self.array[index(c, r, self.width())].get(c_ as u8, r_ as u8);
+        return self.array[index(c, r, self.width())].get_at_xy(c_ as u8, r_ as u8);
     }
 
-    pub fn get_unchecked(&self, x: usize, y: usize) -> bool {
+    pub unsafe fn get_unchecked(&self, x: usize, y: usize) -> bool {
         let c = x.div_euclid(2);
         let c_ = x - c * 2;
 
         let r = y.div_euclid(4);
         let r_ = y - r * 4;
 
-        return self.array[index(c, r, self.width())].get_unchecked(c_ as u8, r_ as u8);
+        return unsafe { self.array[index(c, r, self.width())].get_at_xy_unchecked(c_ as u8, r_ as u8) };
     }
 
     pub fn get_char(&self, x: usize, y: usize) -> &T {
@@ -55,7 +55,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         return &self.array[index(x, y, self.columns)];
     }
 
-    pub fn get_char_unchecked(&self, x: usize, y: usize) -> &T {
+    pub unsafe fn get_char_unchecked(&self, x: usize, y: usize) -> &T {
         return &self.array[index(x, y, self.columns)];
     }
 
@@ -69,17 +69,17 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         let r = y.div_euclid(4);
         let r_ = y - r * 4;
 
-        return self.array[index(c, r, self.columns)].set(c_ as u8, r_ as u8, value);
+        return self.array[index(c, r, self.columns)].set_at_xy(c_ as u8, r_ as u8, value);
     }
 
-    pub fn set_unchecked(&mut self, x: usize, y: usize, value: bool) {
+    pub unsafe fn set_unchecked(&mut self, x: usize, y: usize, value: bool) {
         let c = x.div_euclid(2);
         let c_ = x - c * 2;
 
         let r = y.div_euclid(4);
         let r_ = y - r * 4;
 
-        return self.array[index(c, r, self.columns)].set(c_ as u8, r_ as u8, value);
+        return unsafe { self.array[index(c, r, self.columns)].set_at_xy_unchecked(c_ as u8, r_ as u8, value) };
     }
 
     pub fn set_char(&mut self, x: usize, y: usize, value: T) {
@@ -89,7 +89,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         self.array[index(x, y, self.columns)] = value;
     }
 
-    pub fn set_char_unchecked(&mut self, x: usize, y: usize, value: T) {
+    pub unsafe fn set_char_unchecked(&mut self, x: usize, y: usize, value: T) {
         self.array[index(x, y, self.columns)] = value;
     }
 
@@ -100,7 +100,7 @@ impl<T: BrailleCharTrait> BrailleCharGridVector<T> {
         return &mut self.array[index(x, y, self.columns)];
     }
 
-    pub fn get_char_mut_unchecked(&mut self, x: usize, y: usize) -> &mut T {
+    pub unsafe fn get_char_mut_unchecked(&mut self, x: usize, y: usize) -> &mut T {
         return &mut self.array[index(x, y, self.columns)];
     }
 

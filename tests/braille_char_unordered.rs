@@ -55,7 +55,7 @@ fn unordered_ordered() {
 fn from_array_ordered() {
     let array = [true, true, false, false, true, true, true, true];
 
-    let char = BrailleCharUnOrdered::from_array_ordered(array);
+    let char = BrailleCharUnOrdered::from_array_ordered(&array);
 
     assert_eq!(BYTE_A_UNORDERED, char.unordered());
     assert_eq!(BYTE_A_ORDERED, char.ordered());
@@ -65,7 +65,7 @@ fn from_array_ordered() {
 fn from_array_unordered() {
     let array = [true, true, true, false, true, false, true, true];
 
-    let char = BrailleCharUnOrdered::from_array_unordered(array);
+    let char = BrailleCharUnOrdered::from_array_unordered(&array);
 
     assert_eq!(BYTE_A_UNORDERED, char.unordered());
     assert_eq!(BYTE_A_ORDERED, char.ordered());
@@ -127,24 +127,24 @@ fn from_char_u32_panic() {
 fn get() {
     let char = BrailleCharUnOrdered::from_ordered(BYTE_A_ORDERED);
 
-    assert_eq!(true, char.get(0, 0));
-    assert_eq!(true, char.get(1, 0));
-    assert_eq!(true, char.get(0, 1));
-    assert_eq!(false, char.get(1, 1));
-    assert_eq!(true, char.get(0, 2));
-    assert_eq!(false, char.get(1, 2));
-    assert_eq!(true, char.get(0, 3));
-    assert_eq!(true, char.get(1, 3));
+    assert_eq!(true, char.get_at_xy(0, 0));
+    assert_eq!(true, char.get_at_xy(1, 0));
+    assert_eq!(true, char.get_at_xy(0, 1));
+    assert_eq!(false, char.get_at_xy(1, 1));
+    assert_eq!(true, char.get_at_xy(0, 2));
+    assert_eq!(false, char.get_at_xy(1, 2));
+    assert_eq!(true, char.get_at_xy(0, 3));
+    assert_eq!(true, char.get_at_xy(1, 3));
 }
 
 #[test]
 fn set() {
     let mut char = BrailleCharUnOrdered::from_unordered(BYTE_A_UNORDERED);
 
-    char.set(1, 0, false);
-    char.set(1, 1, true);
-    char.set(1, 2, true);
-    char.set(0, 3, false);
+    char.set_at_xy(1, 0, false);
+    char.set_at_xy(1, 1, true);
+    char.set_at_xy(1, 2, true);
+    char.set_at_xy(0, 3, false);
 
     assert_eq!(BYTE_B_ORDERED, char.ordered());
 }
@@ -154,7 +154,7 @@ fn set() {
 fn get_panic() {
     let char = BrailleCharUnOrdered::from_ordered(BYTE_A_ORDERED);
 
-    char.get(2, 0);
+    char.get_at_xy(2, 0);
 }
 
 #[test]
@@ -162,7 +162,7 @@ fn get_panic() {
 fn get_panic_2() {
     let char = BrailleCharUnOrdered::from_ordered(BYTE_A_ORDERED);
 
-    char.get(0, 4);
+    char.get_at_xy(0, 4);
 }
 
 #[test]
@@ -170,7 +170,7 @@ fn get_panic_2() {
 fn set_panic() {
     let mut char = BrailleCharUnOrdered::from_ordered(BYTE_A_ORDERED);
 
-    char.set(2, 0, false);
+    char.set_at_xy(2, 0, false);
 }
 
 #[test]
@@ -178,6 +178,6 @@ fn set_panic() {
 fn set_panic_2() {
     let mut char = BrailleCharUnOrdered::from_ordered(BYTE_A_ORDERED);
 
-    char.set(0, 4, false);
+    char.set_at_xy(0, 4, false);
 }
 

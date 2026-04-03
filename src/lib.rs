@@ -1,5 +1,5 @@
-pub mod array;
-pub mod vector;
+mod array;
+mod vector;
 
 pub use array::BrailleCharGridArray;
 pub use vector::BrailleCharGridVector;
@@ -105,7 +105,7 @@ pub const fn slice_to_byte(slice: &[bool]) -> u8 {
 
 #[inline(always)]
 pub const fn slice_ordered_to_byte_unordered(slice: &[bool]) -> u8 {
-    const OFFSET: [usize; 8] = [0, 1, 2, 4, 6, 3, 5, 7];
+    const OFFSET: [u8; 8] = [0, 1, 2, 4, 6, 3, 5, 7];
 
     let mut byte = 0u8;
 
@@ -126,7 +126,7 @@ pub const fn slice_ordered_to_byte_unordered(slice: &[bool]) -> u8 {
 
 #[inline(always)]
 pub const fn slice_unordered_to_byte_ordered(slice: &[bool]) -> u8 {
-    const OFFSET: [usize; 8] = [0, 3, 1, 4, 2, 5, 6, 7];
+    const OFFSET: [u8; 8] = [0, 3, 1, 4, 2, 5, 6, 7];
 
     let mut byte = 0u8;
 
@@ -145,21 +145,80 @@ pub const fn slice_unordered_to_byte_ordered(slice: &[bool]) -> u8 {
     return byte;
 }
 
+#[inline(always)]
+pub const fn get_bit(byte: u8, index: u8) -> bool {
+    assert!(index < 8);
+
+    return unsafe { get_bit_unchecked(byte, index) };
+}
+
+#[inline(always)]
+pub const unsafe fn get_bit_unchecked(byte: u8, index: u8) -> bool {
+    return ((byte >> (7 - index)) & 1) != 0;
+}
+
+#[inline(always)]
+pub const fn get_bit_2d(byte: u8, x: u8, y: u8) -> bool {
+    assert!(x < 2);
+    assert!(y < 4);
+
+    return unsafe { get_bit_2d_unchecked(byte, x, y) };
+}
+
+#[inline(always)]
+pub const unsafe fn get_bit_2d_unchecked(byte: u8, x: u8, y: u8) -> bool {
+    return (byte & (0b_1000_0000 >> (x + y * 2))) != 0;
+}
+
+#[inline(always)]
+pub const fn set_bit(byte: u8, index: u8, value: bool) -> u8 {
+    assert!(index < 8);
+
+    return unsafe { set_bit_unchecked(byte, index, value) };
+}
+
+#[inline(always)]
+pub const unsafe fn set_bit_unchecked(byte: u8, index: u8, value: bool) -> u8 {
+    return byte & !(0b_1000_0000 >> index) | (value as u8) << 7 - index;
+}
+
+#[inline(always)]
+pub const fn set_bit_2d(byte: u8, x: u8, y: u8, value: bool) -> u8 {
+    assert!(x < 2);
+    assert!(y < 4);
+
+    return unsafe { set_bit_2d_unchecked(byte, x, y, value) };
+}
+
+#[inline(always)]
+pub const unsafe fn set_bit_2d_unchecked(byte: u8, x: u8, y: u8, value: bool) -> u8 {
+    let o = 7 - x - y * 2;
+
+    return byte & !(1 << o) | (value as u8) << o;
+}
+
+pub const MASK_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
+pub const MASK_UNORDERED_TO_ORDERED: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
+pub const MASK_TRANSPARENT:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct BrailleChar(u8);
 
 impl BrailleChar {
-    pub const EMPTY: Self = Self(0u8);
-    pub const FULL: Self = Self(255u8);
-    pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
-    pub const WIDTH: usize = 2;
+    pub const WIDTH:  usize = 2;
     pub const HEIGHT: usize = 4;
+    pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
+    pub const EMPTY: Self = Self(0u8);
+    pub const FULL:  Self = Self(255u8);
+    pub const MASK_TO_UNORDERED: [u8; 8] = MASK_ORDERED_TO_UNORDERED;
+    pub const MASK_TO_ORDERED:   [u8; 8] = MASK_TRANSPARENT;
 
     #[inline(always)]
     pub const fn ordered(&self) -> u8 {
         return self.0;
     }
 
+    #[inline(always)]
     pub const fn unordered(&self) -> u8 {
         let Self(b) = self;
         let b = ordered_to_unordered(*b);
@@ -172,30 +231,35 @@ impl BrailleChar {
         return Self(b);
     }
 
+    #[inline(always)]
     pub const fn from_unordered(b: u8) -> Self {
         let b = unordered_to_ordered(b);
 
         return Self(b);
     }
 
+    #[inline(always)]
     pub const fn from_array_ordered(array: &[bool; 8]) -> Self {
         let byte = array_to_byte(array);
 
         return Self::from_ordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_array_unordered(array: &[bool; 8]) -> Self {
         let byte = array_unordered_to_byte_ordered(array);
 
         return Self::from_ordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_slice_ordered(slice: &[bool]) -> Self {
         let byte = slice_to_byte(slice);
 
         return Self::from_ordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_slice_unordered(slice: &[bool]) -> Self {
         let byte = slice_unordered_to_byte_ordered(slice);
 
@@ -212,18 +276,19 @@ impl BrailleChar {
         return unsafe { char::from_u32_unchecked(self.u32_char()) };
     }
 
+    #[inline(always)]
     pub const fn from_u32_char(char: u32) -> Option<Self> {
         const MIN: u32 = BrailleChar::CHAR_RANGE.start;
         const MAX: u32 = BrailleChar::CHAR_RANGE.end;
 
         return match char {
-            MIN..MAX => Some(Self::from_u32_char_unchecked(char)),
+            MIN..MAX => Some(unsafe { Self::from_u32_char_unchecked(char) }),
             _ => None
         };
     }
 
     #[inline(always)]
-    pub const fn from_u32_char_unchecked(char: u32) -> Self {
+    pub const unsafe fn from_u32_char_unchecked(char: u32) -> Self {
         return Self::from_ordered((char - Self::CHAR_RANGE.start) as u8);
     }
 
@@ -233,40 +298,79 @@ impl BrailleChar {
     }
 
     #[inline(always)]
-    pub const fn from_char_unchecked(char: char) -> Self {
-        return Self::from_u32_char_unchecked(char as u32);
-    }
-
-    pub const fn get(&self, x: u8, y: u8) -> bool {
-        assert!(x < 2);
-        assert!(y < 4);
-
-        return self.get_unchecked(x, y);
+    pub const unsafe fn from_char_unchecked(char: char) -> Self {
+        return unsafe { Self::from_u32_char_unchecked(char as u32) };
     }
 
     #[inline(always)]
-    pub const fn get_unchecked(&self, x: u8, y: u8) -> bool {
-        return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
-    }
-
-    pub const fn set(&mut self, x: u8, y: u8, value: bool) {
-        assert!(x < 2);
-        assert!(y < 4);
-
-        self.set_unchecked(x, y, value);
+    pub const fn get_at(&self, index: u8) -> bool {
+        return get_bit(self.0, index);
     }
 
     #[inline(always)]
-    pub const fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        let o = 7 - x - y * 2;
+    pub const unsafe fn get_at_unchecked(&self, index: u8) -> bool {
+        return unsafe { get_bit_unchecked(self.0, index) };
+    }
 
-        *self = Self::from_unordered(self.unordered() & !(1 << o) | (value as u8) << o);
+    #[inline(always)]
+    pub const fn get_at_xy(&self, x: u8, y: u8) -> bool {
+        return get_bit_2d(self.unordered(), x, y);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { get_bit_2d_unchecked(self.unordered(), x, y) };
+    }
+
+    #[inline(always)]
+    pub const fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
+        return get_bit_2d(self.0, x, y);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { get_bit_2d_unchecked(self.0, x, y) };
+    }
+
+    #[inline(always)]
+    pub const fn set_at(&mut self, index: u8, value: bool) {
+        self.0 = set_bit(self.0, index, value);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_unchecked(&mut self, index: u8, value: bool) {
+        self.0 = unsafe { set_bit_unchecked(self.0, index, value) };
+    }
+
+    #[inline(always)]
+    pub const fn set_at_xy(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(set_bit_2d(self.unordered(), x, y, value));
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.unordered(), x, y, value) });
+    }
+
+    #[inline(always)]
+    pub const fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(set_bit_2d(self.0, x, y, value));
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.0, x, y, value) });
     }
 }
 
 impl BrailleCharTrait for BrailleChar {
+    const WIDTH:  usize = Self::WIDTH;
+    const HEIGHT: usize = Self::HEIGHT;
+    const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
-    const FULL: Self = Self::FULL;
+    const FULL:  Self = Self::FULL;
+    const MASK_TO_UNORDERED: [u8; 8] = Self::MASK_TO_UNORDERED;
+    const MASK_TO_ORDERED:   [u8; 8] = Self::MASK_TO_ORDERED;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -324,8 +428,8 @@ impl BrailleCharTrait for BrailleChar {
     }
 
     #[inline(always)]
-    fn from_u32_char_unchecked(char: u32) -> Self {
-        return Self::from_u32_char_unchecked(char);
+    unsafe fn from_u32_char_unchecked(char: u32) -> Self {
+        return unsafe { Self::from_u32_char_unchecked(char) };
     }
 
     #[inline(always)]
@@ -334,28 +438,68 @@ impl BrailleCharTrait for BrailleChar {
     }
 
     #[inline(always)]
-    fn from_char_unchecked(char: char) -> Self {
-        return Self::from_char_unchecked(char);
+    unsafe fn from_char_unchecked(char: char) -> Self {
+        return unsafe { Self::from_char_unchecked(char) };
     }
 
     #[inline(always)]
-    fn get(&self, x: u8, y: u8) -> bool {
-        return Self::get(self, x, y);
+    fn get_at(&self, index: u8) -> bool {
+        return Self::get_at(self, index);
     }
 
     #[inline(always)]
-    fn get_unchecked(&self, x: u8, y: u8) -> bool {
-        return Self::get_unchecked(self, x, y);
+    unsafe fn get_at_unchecked(&self, index: u8) -> bool {
+        unsafe { return Self::get_at_unchecked(self, index) };
     }
 
     #[inline(always)]
-    fn set(&mut self, x: u8, y: u8, value: bool) {
-        Self::set(self, x, y, value);
+    fn get_at_xy(&self, x: u8, y: u8) -> bool {
+        return Self::get_at_xy(self, x, y);
     }
 
     #[inline(always)]
-    fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        Self::set_unchecked(self, x, y, value);
+    unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { Self::get_at_xy_unchecked(self, x, y) };
+    }
+
+    #[inline(always)]
+    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
+        return Self::get_at_xy_raw(self, x, y);
+    }
+
+    #[inline(always)]
+    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { Self::get_at_xy_raw_unchecked(self, x, y) };
+    }
+
+    #[inline(always)]
+    fn set_at(&mut self, index: u8, value: bool) {
+        Self::set_at(self, index, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_unchecked(&mut self, index: u8, value: bool) {
+        unsafe { Self::set_at_unchecked(self, index, value) };
+    }
+
+    #[inline(always)]
+    fn set_at_xy(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_at_xy(self, x, y, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        unsafe { Self::set_at_xy_unchecked(self, x, y, value) };
+    }
+
+    #[inline(always)]
+    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_at_xy_raw(self, x, y, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        unsafe { Self::set_at_xy_raw_unchecked(self, x, y, value) };
     }
 }
 
@@ -363,12 +507,15 @@ impl BrailleCharTrait for BrailleChar {
 pub struct BrailleCharUnOrdered(u8);
 
 impl BrailleCharUnOrdered {
-    pub const EMPTY: Self = Self(0u8);
-    pub const FULL: Self = Self(255u8);
-    pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
-    pub const WIDTH: usize = 2;
+    pub const WIDTH:  usize = 2;
     pub const HEIGHT: usize = 4;
+    pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
+    pub const EMPTY: Self = Self(0u8);
+    pub const FULL:  Self = Self(255u8);
+    pub const MASK_TO_UNORDERED: [u8; 8] = MASK_TRANSPARENT;
+    pub const MASK_TO_ORDERED:   [u8; 8] = MASK_UNORDERED_TO_ORDERED;
 
+    #[inline(always)]
     pub const fn ordered(&self) -> u8 {
         let Self(b) = self;
         let b = unordered_to_ordered(*b);
@@ -381,6 +528,7 @@ impl BrailleCharUnOrdered {
         return self.0;
     }
 
+    #[inline(always)]
     pub const fn from_ordered(b: u8) -> Self {
         let b = ordered_to_unordered(b);
 
@@ -392,24 +540,28 @@ impl BrailleCharUnOrdered {
         return Self(b);
     }
 
+    #[inline(always)]
     pub const fn from_array_ordered(array: &[bool; 8]) -> Self {
         let byte = array_ordered_to_byte_unordered(array);
 
         return Self::from_unordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_array_unordered(array: &[bool; 8]) -> Self {
         let byte = array_to_byte(array);
 
         return Self::from_unordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_slice_ordered(slice: &[bool]) -> Self {
         let byte = slice_ordered_to_byte_unordered(slice);
 
         return Self::from_unordered(byte);
     }
 
+    #[inline(always)]
     pub const fn from_slice_unordered(slice: &[bool]) -> Self {
         let byte = slice_to_byte(slice);
 
@@ -426,18 +578,19 @@ impl BrailleCharUnOrdered {
         return unsafe { char::from_u32_unchecked(self.u32_char()) };
     }
 
+    #[inline(always)]
     pub const fn from_u32_char(char: u32) -> Option<Self> {
         const MIN: u32 = BrailleChar::CHAR_RANGE.start;
         const MAX: u32 = BrailleChar::CHAR_RANGE.end;
 
         return match char {
-            MIN..MAX => Some(Self::from_u32_char_unchecked(char)),
+            MIN..MAX => Some(unsafe { Self::from_u32_char_unchecked(char) }),
             _ => None
         };
     }
 
     #[inline(always)]
-    pub const fn from_u32_char_unchecked(char: u32) -> Self {
+    pub const unsafe fn from_u32_char_unchecked(char: u32) -> Self {
         return Self::from_ordered((char - Self::CHAR_RANGE.start) as u8);
     }
 
@@ -447,40 +600,79 @@ impl BrailleCharUnOrdered {
     }
 
     #[inline(always)]
-    pub const fn from_char_unchecked(char: char) -> Self {
-        return Self::from_u32_char_unchecked(char as u32);
-    }
-
-    pub const fn get(&self, x: u8, y: u8) -> bool {
-        assert!(x < 2);
-        assert!(y < 4);
-
-        return self.get_unchecked(x, y);
+    pub const unsafe fn from_char_unchecked(char: char) -> Self {
+        return unsafe { Self::from_u32_char_unchecked(char as u32) };
     }
 
     #[inline(always)]
-    pub const fn get_unchecked(&self, x: u8, y: u8) -> bool {
-        return (self.unordered() & (0b_1000_0000 >> (x + y * 2))) != 0;
-    }
-
-    pub const fn set(&mut self, x: u8, y: u8, value: bool) {
-        assert!(x < 2);
-        assert!(y < 4);
-
-        self.set_unchecked(x, y, value);
+    pub const fn get_at(&self, index: u8) -> bool {
+        return get_bit(self.0, index);
     }
 
     #[inline(always)]
-    pub const fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        let o = 7 - x - y * 2;
+    pub const unsafe fn get_at_unchecked(&self, index: u8) -> bool {
+        return unsafe { get_bit_unchecked(self.0, index) };
+    }
 
-        *self = Self::from_unordered(self.unordered() & !(1 << o) | (value as u8) << o);
+    #[inline(always)]
+    pub const fn get_at_xy(&self, x: u8, y: u8) -> bool {
+        return get_bit_2d(self.unordered(), x, y);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { get_bit_2d_unchecked(self.unordered(), x, y) };
+    }
+
+    #[inline(always)]
+    pub const fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
+        return get_bit_2d(self.0, x, y);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { get_bit_2d_unchecked(self.0, x, y) };
+    }
+
+    #[inline(always)]
+    pub const fn set_at(&mut self, index: u8, value: bool) {
+        self.0 = set_bit(self.0, index, value);
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_unchecked(&mut self, index: u8, value: bool) {
+        self.0 = unsafe { set_bit_unchecked(self.0, index, value) };
+    }
+
+    #[inline(always)]
+    pub const fn set_at_xy(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(set_bit_2d(self.unordered(), x, y, value));
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.unordered(), x, y, value) });
+    }
+
+    #[inline(always)]
+    pub const fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(set_bit_2d(self.0, x, y, value));
+    }
+
+    #[inline(always)]
+    pub const unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.0, x, y, value) });
     }
 }
 
 impl BrailleCharTrait for BrailleCharUnOrdered {
+    const WIDTH:  usize = Self::WIDTH;
+    const HEIGHT: usize = Self::HEIGHT;
+    const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
-    const FULL: Self = Self::FULL;
+    const FULL:  Self = Self::FULL;
+    const MASK_TO_UNORDERED: [u8; 8] = Self::MASK_TO_UNORDERED;
+    const MASK_TO_ORDERED:   [u8; 8] = Self::MASK_TO_ORDERED;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -538,8 +730,8 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     }
 
     #[inline(always)]
-    fn from_u32_char_unchecked(char: u32) -> Self {
-        return Self::from_u32_char_unchecked(char);
+    unsafe fn from_u32_char_unchecked(char: u32) -> Self {
+        return unsafe { Self::from_u32_char_unchecked(char) };
     }
 
     #[inline(always)]
@@ -548,37 +740,79 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     }
 
     #[inline(always)]
-    fn from_char_unchecked(char: char) -> Self {
-        return Self::from_char_unchecked(char);
+    unsafe fn from_char_unchecked(char: char) -> Self {
+        return unsafe { Self::from_char_unchecked(char) };
     }
 
     #[inline(always)]
-    fn get(&self, x: u8, y: u8) -> bool {
-        return Self::get(self, x, y);
+    fn get_at(&self, index: u8) -> bool {
+        return Self::get_at(self, index);
     }
 
     #[inline(always)]
-    fn get_unchecked(&self, x: u8, y: u8) -> bool {
-        return Self::get_unchecked(self, x, y);
+    unsafe fn get_at_unchecked(&self, index: u8) -> bool {
+        unsafe { return Self::get_at_unchecked(self, index) };
     }
 
     #[inline(always)]
-    fn set(&mut self, x: u8, y: u8, value: bool) {
-        Self::set(self, x, y, value);
+    fn get_at_xy(&self, x: u8, y: u8) -> bool {
+        return Self::get_at_xy(self, x, y);
     }
 
     #[inline(always)]
-    fn set_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        Self::set_unchecked(self, x, y, value);
+    unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { Self::get_at_xy_unchecked(self, x, y) };
+    }
+
+    #[inline(always)]
+    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
+        return Self::get_at_xy_raw(self, x, y);
+    }
+
+    #[inline(always)]
+    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
+        return unsafe { Self::get_at_xy_raw_unchecked(self, x, y) };
+    }
+
+    #[inline(always)]
+    fn set_at(&mut self, index: u8, value: bool) {
+        Self::set_at(self, index, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_unchecked(&mut self, index: u8, value: bool) {
+        unsafe { Self::set_at_unchecked(self, index, value) };
+    }
+
+    #[inline(always)]
+    fn set_at_xy(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_at_xy(self, x, y, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        unsafe { Self::set_at_xy_unchecked(self, x, y, value) };
+    }
+
+    #[inline(always)]
+    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
+        Self::set_at_xy_raw(self, x, y, value);
+    }
+
+    #[inline(always)]
+    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
+        unsafe { Self::set_at_xy_raw_unchecked(self, x, y, value) };
     }
 }
 
 pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug {
-    const EMPTY: Self;
-    const FULL: Self;
-    const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
-    const WIDTH: usize = 2;
+    const WIDTH:  usize = 2;
     const HEIGHT: usize = 4;
+    const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
+    const EMPTY: Self;
+    const FULL:  Self;
+    const MASK_TO_UNORDERED: [u8; 8];
+    const MASK_TO_ORDERED:   [u8; 8];
 
     fn ordered(&self) -> u8;
 
@@ -602,19 +836,35 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 
     fn from_u32_char(char: u32) -> Option<Self>;
 
-    fn from_u32_char_unchecked(char: u32) -> Self;
+    unsafe fn from_u32_char_unchecked(char: u32) -> Self;
 
     fn from_char(char: char) -> Option<Self>;
 
-    fn from_char_unchecked(char: char) -> Self;
+    unsafe fn from_char_unchecked(char: char) -> Self;
 
-    fn get(&self, x: u8, y: u8) -> bool;
+    fn get_at(&self, index: u8) -> bool;
 
-    fn get_unchecked(&self, x: u8, y: u8) -> bool;
+    unsafe fn get_at_unchecked(&self, index: u8) -> bool;
 
-    fn set(&mut self, x: u8, y: u8, value: bool);
+    fn get_at_xy(&self, x: u8, y: u8) -> bool;
 
-    fn set_unchecked(&mut self, x: u8, y: u8, value: bool);
+    unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool;
+
+    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool;
+
+    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool;
+
+    fn set_at(&mut self, index: u8, value: bool);
+
+    unsafe fn set_at_unchecked(&mut self, index: u8, value: bool);
+
+    fn set_at_xy(&mut self, x: u8, y: u8, value: bool);
+
+    unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool);
+
+    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool);
+
+    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool);
 }
 
 impl From<BrailleCharUnOrdered> for BrailleChar {

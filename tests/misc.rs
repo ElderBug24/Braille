@@ -1,4 +1,4 @@
-use braille::{byte_to_array, array_to_byte};
+use braille::{BrailleChar, BrailleCharUnOrdered, byte_to_array, array_to_byte, get_bit, get_bit_2d, set_bit, MASK_ORDERED_TO_UNORDERED, MASK_UNORDERED_TO_ORDERED};
 
 
 #[test]
@@ -31,5 +31,91 @@ fn array_to_byte_() {
     assert_eq!(a, array_to_byte(&A));
     assert_eq!(b, array_to_byte(&B));
     assert_eq!(c, array_to_byte(&C));
+}
+
+#[test]
+fn get_bit_() {
+    let byte = 0b_1101_0010;
+
+    assert_eq!(true, get_bit(byte, 0));
+    assert_eq!(true, get_bit(byte, 1));
+    assert_eq!(false, get_bit(byte, 2));
+    assert_eq!(true, get_bit(byte, 3));
+    assert_eq!(false, get_bit(byte, 4));
+    assert_eq!(false, get_bit(byte, 5));
+    assert_eq!(true, get_bit(byte, 6));
+    assert_eq!(false, get_bit(byte, 7));
+}
+
+#[test]
+#[should_panic]
+fn get_bit_panic() {
+    get_bit(0u8, 8);
+}
+
+#[test]
+fn get_bit_2d_() {
+    let byte = 0b_1101_0010;
+
+    assert_eq!(true, get_bit_2d(byte, 0, 0));
+    assert_eq!(true, get_bit_2d(byte, 1, 0));
+    assert_eq!(false, get_bit_2d(byte, 0, 1));
+    assert_eq!(true, get_bit_2d(byte, 1, 1));
+    assert_eq!(false, get_bit_2d(byte, 0, 2));
+    assert_eq!(false, get_bit_2d(byte, 1, 2));
+    assert_eq!(true, get_bit_2d(byte, 0, 3));
+    assert_eq!(false, get_bit_2d(byte, 1, 3));
+}
+
+#[test]
+#[should_panic]
+fn get_bit_2d_panic() {
+    get_bit_2d(0u8, 2, 0);
+}
+
+#[test]
+#[should_panic]
+fn get_bit_2d_panic2() {
+    get_bit_2d(0u8, 0, 4);
+}
+
+#[test]
+fn set_bit_() {
+    let mut byte = 0u8;
+
+    byte = set_bit(byte, 0, true);
+    assert_eq!(0b_1000_0000, byte);
+    byte = set_bit(byte, 1, true);
+    assert_eq!(0b_1100_0000, byte);
+    byte = set_bit(byte, 3, true);
+    assert_eq!(0b_1101_0000, byte);
+    byte = set_bit(byte, 6, true);
+    assert_eq!(0b_1101_0010, byte);
+}
+
+#[test]
+#[should_panic]
+fn set_bit_panic() {
+    set_bit(0u8, 8, false);
+}
+
+#[test]
+fn masks() {
+    let byte = 0b_1101_0010;
+    let arr = [true, true, false, true, false, false, true, false];
+
+    let char = BrailleChar::from_unordered(byte);
+
+    for i in 0..8 {
+        let index = MASK_UNORDERED_TO_ORDERED[i];
+        assert_eq!(arr[i], char.get_at(index));
+    }
+
+    let char = BrailleCharUnOrdered::from_ordered(byte);
+
+    for i in 0..8 {
+        let index = MASK_ORDERED_TO_UNORDERED[i];
+        assert_eq!(arr[i], char.get_at(index));
+    }
 }
 
