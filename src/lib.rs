@@ -167,7 +167,7 @@ pub const fn get_bit_2d(byte: u8, x: u8, y: u8) -> bool {
 
 #[inline(always)]
 pub const unsafe fn get_bit_2d_unchecked(byte: u8, x: u8, y: u8) -> bool {
-    return (byte & (0b_1000_0000 >> (x + y * 2))) != 0;
+    return unsafe { get_bit_unchecked(byte, x + y * 2) };
 }
 
 #[inline(always)]
@@ -179,7 +179,7 @@ pub const fn set_bit(byte: u8, index: u8, value: bool) -> u8 {
 
 #[inline(always)]
 pub const unsafe fn set_bit_unchecked(byte: u8, index: u8, value: bool) -> u8 {
-    return byte & !(0b_1000_0000 >> index) | (value as u8) << 7 - index;
+    return (byte & !(0b_1000_0000 >> index)) | ((value as u8) << (7 - index));
 }
 
 #[inline(always)]
@@ -192,9 +192,7 @@ pub const fn set_bit_2d(byte: u8, x: u8, y: u8, value: bool) -> u8 {
 
 #[inline(always)]
 pub const unsafe fn set_bit_2d_unchecked(byte: u8, x: u8, y: u8, value: bool) -> u8 {
-    let o = 7 - x - y * 2;
-
-    return byte & !(1 << o) | (value as u8) << o;
+    return unsafe { set_bit_unchecked(byte, x + y * 2, value) };
 }
 
 pub const MASK_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];

@@ -91,6 +91,15 @@ fn set_bit_() {
     assert_eq!(0b_1101_0000, byte);
     byte = set_bit(byte, 6, true);
     assert_eq!(0b_1101_0010, byte);
+
+    byte = set_bit(byte, 2, true);
+    assert_eq!(0b_1111_0010, byte);
+    byte = set_bit(byte, 4, true);
+    assert_eq!(0b_1111_1010, byte);
+    byte = set_bit(byte, 5, true);
+    assert_eq!(0b_1111_1110, byte);
+    byte = set_bit(byte, 7, true);
+    assert_eq!(0b_1111_1111, byte);
 }
 
 #[test]
