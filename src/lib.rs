@@ -5,6 +5,7 @@ pub use array::BrailleCharGridArray;
 pub use vector::BrailleCharGridVector;
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign, Range};
+use std::fmt::{self, Debug};
 
 
 #[inline(always)]
@@ -199,7 +200,7 @@ pub const MAP_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
 pub const MAP_UNORDERED_TO_ORDERED: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
 pub const MAP_TRANSPARENT:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct BrailleChar(u8);
 
 impl BrailleChar {
@@ -543,7 +544,7 @@ impl BrailleCharTrait for BrailleChar {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct BrailleCharUnOrdered(u8);
 
 impl BrailleCharUnOrdered {
@@ -887,7 +888,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     }
 }
 
-pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug + Into<char> + Into<u32> + BitAnd<Self> + BitAndAssign<Self> + BitOr<Self> + BitOrAssign<Self> + BitXor<Self> + BitXorAssign<Self> + Not + Shl<u8> + ShlAssign<u8> + Shr<u8> + ShrAssign<u8> {
+pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + Debug + Default + Into<char> + Into<u32> + BitAnd<Self> + BitAndAssign<Self> + BitOr<Self> + BitOrAssign<Self> + BitXor<Self> + BitXorAssign<Self> + Not + Shl<u8> + ShlAssign<u8> + Shr<u8> + ShrAssign<u8> {
     const WIDTH:  usize = 2;
     const HEIGHT: usize = 4;
     const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
@@ -944,6 +945,30 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
     fn set_at_xy(&mut self, x: u8, y: u8, value: bool);
 
     unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool);
+}
+
+impl Default for BrailleChar {
+    fn default() -> Self {
+        return Self::EMPTY;
+    }
+}
+
+impl Default for BrailleCharUnOrdered {
+    fn default() -> Self {
+        return Self::EMPTY;
+    }
+}
+
+impl Debug for BrailleChar {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        return write!(formatter, "BrailleChar({:08b}) = '{}'", self.0, self.char());
+    }
+}
+
+impl Debug for BrailleCharUnOrdered {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        return write!(formatter, "BrailleCharUnOrdered({:08b}) = '{}'", self.0, self.char());
+    }
 }
 
 impl From<BrailleCharUnOrdered> for BrailleChar {
