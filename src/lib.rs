@@ -4,7 +4,7 @@ mod vector;
 pub use array::BrailleCharGridArray;
 pub use vector::BrailleCharGridVector;
 
-use std::ops::Range;
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign, Range};
 
 
 #[inline(always)]
@@ -208,6 +208,7 @@ impl BrailleChar {
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
+    pub const IS_ORDERED: bool = true;
     pub const MAP_TO_UNORDERED: [u8; 8] = MAP_ORDERED_TO_UNORDERED;
     pub const MAP_TO_ORDERED:   [u8; 8] = MAP_TRANSPARENT;
 
@@ -301,6 +302,16 @@ impl BrailleChar {
     }
 
     #[inline(always)]
+    pub const fn to_unordered(&self) -> BrailleCharUnOrdered {
+        return BrailleCharUnOrdered(self.unordered());
+    }
+
+    #[inline(always)]
+    pub const fn to_unordered_raw(&self) -> BrailleCharUnOrdered {
+        return BrailleCharUnOrdered(self.0);
+    }
+
+    #[inline(always)]
     pub const fn get_at(&self, index: u8) -> bool {
         return get_bit(self.0, index);
     }
@@ -318,16 +329,6 @@ impl BrailleChar {
     #[inline(always)]
     pub const unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
         return unsafe { get_bit_2d_unchecked(self.unordered(), x, y) };
-    }
-
-    #[inline(always)]
-    pub const fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
-        return get_bit_2d(self.0, x, y);
-    }
-
-    #[inline(always)]
-    pub const unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
-        return unsafe { get_bit_2d_unchecked(self.0, x, y) };
     }
 
     #[inline(always)]
@@ -351,13 +352,63 @@ impl BrailleChar {
     }
 
     #[inline(always)]
-    pub const fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
-        *self = Self::from_unordered(set_bit_2d(self.0, x, y, value));
+    pub const fn bitand(&self, rhs: &Self) -> Self {
+        return Self(self.0 & rhs.0);
     }
 
     #[inline(always)]
-    pub const unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.0, x, y, value) });
+    pub const fn bitand_assign(&mut self, rhs: &Self) {
+        *self = Self::bitand(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn bitor(&self, rhs: &Self) -> Self {
+        return Self(self.0 | rhs.0);
+    }
+
+    #[inline(always)]
+    pub const fn bitor_assign(&mut self, rhs: &Self) {
+        *self = Self::bitor(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn bitxor(&self, rhs: &Self) -> Self {
+        return Self(self.0 ^ rhs.0);
+    }
+
+    #[inline(always)]
+    pub const fn bitxor_assign(&mut self, rhs: &Self) {
+        *self = Self::bitxor(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn not(&self) -> Self {
+        return Self(!self.0);
+    }
+
+    #[inline(always)]
+    pub const fn not_assign(&mut self) {
+        *self = Self::not(self);
+    }
+
+    #[inline(always)]
+    pub const fn shl(&self, rhs: u8) -> Self {
+        return Self(self.0 << rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shl_assign(&mut self, rhs: u8) {
+        *self = Self::shl(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shr(&self, rhs: u8) -> Self {
+        return Self(self.0 >> rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shr_assign(&mut self, rhs: u8) {
+        *self = Self::shr(self, rhs);
     }
 }
 
@@ -367,6 +418,7 @@ impl BrailleCharTrait for BrailleChar {
     const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
+    const IS_ORDERED: bool = Self::IS_ORDERED;
     const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
     const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
 
@@ -408,6 +460,16 @@ impl BrailleCharTrait for BrailleChar {
     #[inline(always)]
     fn from_slice_unordered(slice: &[bool]) -> Self {
         return Self::from_slice_unordered(slice);
+    }
+
+    #[inline(always)]
+    fn to_ordered(&self) -> BrailleChar {
+        return *self;
+    }
+
+    #[inline(always)]
+    fn to_unordered(&self) -> BrailleCharUnOrdered {
+        return Self::to_unordered(self);
     }
 
     #[inline(always)]
@@ -461,16 +523,6 @@ impl BrailleCharTrait for BrailleChar {
     }
 
     #[inline(always)]
-    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
-        return Self::get_at_xy_raw(self, x, y);
-    }
-
-    #[inline(always)]
-    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
-        return unsafe { Self::get_at_xy_raw_unchecked(self, x, y) };
-    }
-
-    #[inline(always)]
     fn set_at(&mut self, index: u8, value: bool) {
         Self::set_at(self, index, value);
     }
@@ -489,16 +541,6 @@ impl BrailleCharTrait for BrailleChar {
     unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
         unsafe { Self::set_at_xy_unchecked(self, x, y, value) };
     }
-
-    #[inline(always)]
-    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
-        Self::set_at_xy_raw(self, x, y, value);
-    }
-
-    #[inline(always)]
-    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        unsafe { Self::set_at_xy_raw_unchecked(self, x, y, value) };
-    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
@@ -510,6 +552,7 @@ impl BrailleCharUnOrdered {
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
+    pub const IS_ORDERED: bool = false;
     pub const MAP_TO_UNORDERED: [u8; 8] = MAP_TRANSPARENT;
     pub const MAP_TO_ORDERED:   [u8; 8] = MAP_UNORDERED_TO_ORDERED;
 
@@ -603,6 +646,16 @@ impl BrailleCharUnOrdered {
     }
 
     #[inline(always)]
+    pub const fn to_ordered(&self) -> BrailleChar {
+        return BrailleChar(self.ordered());
+    }
+
+    #[inline(always)]
+    pub const fn to_ordered_raw(&self) -> BrailleChar {
+        return BrailleChar(self.0);
+    }
+
+    #[inline(always)]
     pub const fn get_at(&self, index: u8) -> bool {
         return get_bit(self.0, index);
     }
@@ -620,16 +673,6 @@ impl BrailleCharUnOrdered {
     #[inline(always)]
     pub const unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
         return unsafe { get_bit_2d_unchecked(self.unordered(), x, y) };
-    }
-
-    #[inline(always)]
-    pub const fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
-        return get_bit_2d(self.0, x, y);
-    }
-
-    #[inline(always)]
-    pub const unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
-        return unsafe { get_bit_2d_unchecked(self.0, x, y) };
     }
 
     #[inline(always)]
@@ -653,13 +696,63 @@ impl BrailleCharUnOrdered {
     }
 
     #[inline(always)]
-    pub const fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
-        *self = Self::from_unordered(set_bit_2d(self.0, x, y, value));
+    pub const fn bitand(&self, rhs: &Self) -> Self {
+        return Self(self.0 & rhs.0);
     }
 
     #[inline(always)]
-    pub const unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        *self = Self::from_unordered(unsafe { set_bit_2d_unchecked(self.0, x, y, value) });
+    pub const fn bitand_assign(&mut self, rhs: &Self) {
+        *self = Self::bitand(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn bitor(&self, rhs: &Self) -> Self {
+        return Self(self.0 | rhs.0);
+    }
+
+    #[inline(always)]
+    pub const fn bitor_assign(&mut self, rhs: &Self) {
+        *self = Self::bitor(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn bitxor(&self, rhs: &Self) -> Self {
+        return Self(self.0 ^ rhs.0);
+    }
+
+    #[inline(always)]
+    pub const fn bitxor_assign(&mut self, rhs: &Self) {
+        *self = Self::bitxor(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn not(&self) -> Self {
+        return Self(!self.0);
+    }
+
+    #[inline(always)]
+    pub const fn not_assign(&mut self) {
+        *self = Self(!self.0);
+    }
+
+    #[inline(always)]
+    pub const fn shl(&self, rhs: u8) -> Self {
+        return Self(self.0 << rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shl_assign(&mut self, rhs: u8) {
+        *self = Self::shl(self, rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shr(&self, rhs: u8) -> Self {
+        return Self(self.0 >> rhs);
+    }
+
+    #[inline(always)]
+    pub const fn shr_assign(&mut self, rhs: u8) {
+        *self = Self::shr(self, rhs);
     }
 }
 
@@ -669,6 +762,7 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
+    const IS_ORDERED: bool = Self::IS_ORDERED;
     const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
     const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
 
@@ -743,6 +837,16 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     }
 
     #[inline(always)]
+    fn to_ordered(&self) -> BrailleChar {
+        return Self::to_ordered(self);
+    }
+
+    #[inline(always)]
+    fn to_unordered(&self) -> BrailleCharUnOrdered {
+        return *self;
+    }
+
+    #[inline(always)]
     fn get_at(&self, index: u8) -> bool {
         return Self::get_at(self, index);
     }
@@ -760,16 +864,6 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     #[inline(always)]
     unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool {
         return unsafe { Self::get_at_xy_unchecked(self, x, y) };
-    }
-
-    #[inline(always)]
-    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool {
-        return Self::get_at_xy_raw(self, x, y);
-    }
-
-    #[inline(always)]
-    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool {
-        return unsafe { Self::get_at_xy_raw_unchecked(self, x, y) };
     }
 
     #[inline(always)]
@@ -791,24 +885,15 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool) {
         unsafe { Self::set_at_xy_unchecked(self, x, y, value) };
     }
-
-    #[inline(always)]
-    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool) {
-        Self::set_at_xy_raw(self, x, y, value);
-    }
-
-    #[inline(always)]
-    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool) {
-        unsafe { Self::set_at_xy_raw_unchecked(self, x, y, value) };
-    }
 }
 
-pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug {
+pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::Debug + Into<char> + Into<u32> + BitAnd<Self> + BitAndAssign<Self> + BitOr<Self> + BitOrAssign<Self> + BitXor<Self> + BitXorAssign<Self> + Not + Shl<u8> + ShlAssign<u8> + Shr<u8> + ShrAssign<u8> {
     const WIDTH:  usize = 2;
     const HEIGHT: usize = 4;
     const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     const EMPTY: Self;
     const FULL:  Self;
+    const IS_ORDERED: bool;
     const MAP_TO_UNORDERED: [u8; 8];
     const MAP_TO_ORDERED:   [u8; 8];
 
@@ -840,6 +925,10 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 
     unsafe fn from_char_unchecked(char: char) -> Self;
 
+    fn to_ordered(&self) -> BrailleChar;
+
+    fn to_unordered(&self) -> BrailleCharUnOrdered;
+
     fn get_at(&self, index: u8) -> bool;
 
     unsafe fn get_at_unchecked(&self, index: u8) -> bool;
@@ -848,10 +937,6 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
 
     unsafe fn get_at_xy_unchecked(&self, x: u8, y: u8) -> bool;
 
-    fn get_at_xy_raw(&self, x: u8, y: u8) -> bool;
-
-    unsafe fn get_at_xy_raw_unchecked(&self, x: u8, y: u8) -> bool;
-
     fn set_at(&mut self, index: u8, value: bool);
 
     unsafe fn set_at_unchecked(&mut self, index: u8, value: bool);
@@ -859,10 +944,6 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
     fn set_at_xy(&mut self, x: u8, y: u8, value: bool);
 
     unsafe fn set_at_xy_unchecked(&mut self, x: u8, y: u8, value: bool);
-
-    fn set_at_xy_raw(&mut self, x: u8, y: u8, value: bool);
-
-    unsafe fn set_at_xy_raw_unchecked(&mut self, x: u8, y: u8, value: bool);
 }
 
 impl From<BrailleCharUnOrdered> for BrailleChar {
@@ -882,28 +963,184 @@ impl From<BrailleChar> for BrailleCharUnOrdered {
 impl Into<char> for BrailleChar {
     #[inline(always)]
     fn into(self) -> char {
-        return self.char();
+        return Self::char(&self);
     }
 }
 
 impl Into<char> for BrailleCharUnOrdered {
     #[inline(always)]
     fn into(self) -> char {
-        return self.char();
+        return Self::char(&self);
     }
 }
 
 impl Into<u32> for BrailleChar {
     #[inline(always)]
     fn into(self) -> u32 {
-        return self.u32_char();
+        return Self::u32_char(&self);
     }
 }
 
 impl Into<u32> for BrailleCharUnOrdered {
     #[inline(always)]
     fn into(self) -> u32 {
-        return self.u32_char();
+        return Self::u32_char(&self);
+    }
+}
+
+impl BitAnd<Self> for BrailleChar {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        return Self::bitand(&self, &rhs);
+    }
+}
+
+impl BitAnd<Self> for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        return Self::bitand(&self, &rhs);
+    }
+}
+
+impl BitAndAssign<Self> for BrailleChar {
+    fn bitand_assign(&mut self, rhs: Self) {
+        Self::bitand_assign(self, &rhs);
+    }
+}
+
+impl BitAndAssign<Self> for BrailleCharUnOrdered {
+    fn bitand_assign(&mut self, rhs: Self) {
+        Self::bitand_assign(self, &rhs);
+    }
+}
+
+impl BitOr<Self> for BrailleChar {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        return Self::bitor(&self, &rhs);
+    }
+}
+
+impl BitOr<Self> for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        return Self::bitor(&self, &rhs);
+    }
+}
+
+impl BitOrAssign<Self> for BrailleChar {
+    fn bitor_assign(&mut self, rhs: Self) {
+        Self::bitor_assign(self, &rhs);
+    }
+}
+
+impl BitOrAssign<Self> for BrailleCharUnOrdered {
+    fn bitor_assign(&mut self, rhs: Self) {
+        Self::bitor_assign(self, &rhs);
+    }
+}
+
+impl BitXor<Self> for BrailleChar {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        return Self::bitxor(&self, &rhs);
+    }
+}
+
+impl BitXor<Self> for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        return Self::bitxor(&self, &rhs);
+    }
+}
+
+impl BitXorAssign<Self> for BrailleChar {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        Self::bitxor_assign(self, &rhs);
+    }
+}
+
+impl BitXorAssign<Self> for BrailleCharUnOrdered {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        Self::bitxor_assign(self, &rhs);
+    }
+}
+
+impl Not for BrailleChar {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        return Self::not(&self);
+    }
+}
+
+impl Not for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        return Self::not(&self);
+    }
+}
+
+impl Shl<u8> for BrailleChar {
+    type Output = Self;
+
+    fn shl(self, rhs: u8) -> Self::Output {
+        return Self::shl(&self, rhs);
+    }
+}
+
+impl Shl<u8> for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn shl(self, rhs: u8) -> Self::Output {
+        return Self::shl(&self, rhs);
+    }
+}
+
+impl ShlAssign<u8> for BrailleChar {
+    fn shl_assign(&mut self, rhs: u8) {
+        Self::shl_assign(self, rhs);
+    }
+}
+
+impl ShlAssign<u8> for BrailleCharUnOrdered {
+    fn shl_assign(&mut self, rhs: u8) {
+        Self::shl_assign(self, rhs);
+    }
+}
+
+impl Shr<u8> for BrailleChar {
+    type Output = Self;
+
+    fn shr(self, rhs: u8) -> Self::Output {
+        return Self::shr(&self, rhs);
+    }
+}
+
+impl Shr<u8> for BrailleCharUnOrdered {
+    type Output = Self;
+
+    fn shr(self, rhs: u8) -> Self::Output {
+        return Self::shr(&self, rhs);
+    }
+}
+
+impl ShrAssign<u8> for BrailleChar {
+    fn shr_assign(&mut self, rhs: u8) {
+        Self::shr_assign(self, rhs);
+    }
+}
+
+impl ShrAssign<u8> for BrailleCharUnOrdered {
+    fn shr_assign(&mut self, rhs: u8) {
+        Self::shr_assign(self, rhs);
     }
 }
 
