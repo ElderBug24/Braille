@@ -45,7 +45,7 @@ pub const fn byte_to_array(b: u8) -> [bool; 8] {
         ((b & 0b_0000_1000) >> 3) != 0,
         ((b & 0b_0000_0100) >> 2) != 0,
         ((b & 0b_0000_0010) >> 1) != 0,
-         (b & 0b_0000_0001) != 0
+         (b & 0b_0000_0001)       != 0
     ];
 }
 
@@ -195,9 +195,9 @@ pub const unsafe fn set_bit_2d_unchecked(byte: u8, x: u8, y: u8, value: bool) ->
     return unsafe { set_bit_unchecked(byte, x + y * 2, value) };
 }
 
-pub const MASK_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
-pub const MASK_UNORDERED_TO_ORDERED: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
-pub const MASK_TRANSPARENT:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+pub const MAP_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
+pub const MAP_UNORDERED_TO_ORDERED: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
+pub const MAP_TRANSPARENT:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct BrailleChar(u8);
@@ -208,8 +208,8 @@ impl BrailleChar {
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
-    pub const MASK_TO_UNORDERED: [u8; 8] = MASK_ORDERED_TO_UNORDERED;
-    pub const MASK_TO_ORDERED:   [u8; 8] = MASK_TRANSPARENT;
+    pub const MAP_TO_UNORDERED: [u8; 8] = MAP_ORDERED_TO_UNORDERED;
+    pub const MAP_TO_ORDERED:   [u8; 8] = MAP_TRANSPARENT;
 
     #[inline(always)]
     pub const fn ordered(&self) -> u8 {
@@ -367,8 +367,8 @@ impl BrailleCharTrait for BrailleChar {
     const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
-    const MASK_TO_UNORDERED: [u8; 8] = Self::MASK_TO_UNORDERED;
-    const MASK_TO_ORDERED:   [u8; 8] = Self::MASK_TO_ORDERED;
+    const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
+    const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -510,8 +510,8 @@ impl BrailleCharUnOrdered {
     pub const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
-    pub const MASK_TO_UNORDERED: [u8; 8] = MASK_TRANSPARENT;
-    pub const MASK_TO_ORDERED:   [u8; 8] = MASK_UNORDERED_TO_ORDERED;
+    pub const MAP_TO_UNORDERED: [u8; 8] = MAP_TRANSPARENT;
+    pub const MAP_TO_ORDERED:   [u8; 8] = MAP_UNORDERED_TO_ORDERED;
 
     #[inline(always)]
     pub const fn ordered(&self) -> u8 {
@@ -669,8 +669,8 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     const CHAR_RANGE: Range<u32> = Self::CHAR_RANGE;
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
-    const MASK_TO_UNORDERED: [u8; 8] = Self::MASK_TO_UNORDERED;
-    const MASK_TO_ORDERED:   [u8; 8] = Self::MASK_TO_ORDERED;
+    const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
+    const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -809,8 +809,8 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + std::fmt::De
     const CHAR_RANGE: Range<u32> = 0x2800..(0x2800 + u8::MAX as u32);
     const EMPTY: Self;
     const FULL:  Self;
-    const MASK_TO_UNORDERED: [u8; 8];
-    const MASK_TO_ORDERED:   [u8; 8];
+    const MAP_TO_UNORDERED: [u8; 8];
+    const MAP_TO_ORDERED:   [u8; 8];
 
     fn ordered(&self) -> u8;
 

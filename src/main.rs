@@ -36,6 +36,6 @@ fn main() {
         }
         let char = BrailleChar::from_unordered(byte);
 
-        println!("\n{}\n", char.char());
+        println!("_\n{}|\n", char.char());
     }
 }
