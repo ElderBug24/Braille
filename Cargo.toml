@@ -7,6 +7,7 @@ edition = "2024"
 opt-level = 3
 lto = true
 
-[dependencies]
+# [dependencies]
+[dev-dependencies]
 glam = "0.32.1"
 image = "0.25.10"
