@@ -5,8 +5,7 @@ pub use array::BrailleCharGridArray;
 pub use vector::BrailleCharGridVector;
 
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr, ShrAssign, Range};
-use std::fmt::{self, Debug};
-
+use std::fmt::{self, Debug, Display};
 
 #[inline(always)]
 pub const fn unordered_to_ordered(b: u8) -> u8 {
@@ -968,6 +967,18 @@ impl Debug for BrailleChar {
 impl Debug for BrailleCharUnOrdered {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         return write!(formatter, "BrailleCharUnOrdered({:08b}) = '{}'", self.0, self.char());
+    }
+}
+
+impl Display for BrailleChar {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        return write!(formatter, "{}", self.char());
+    }
+}
+
+impl Display for BrailleCharUnOrdered {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        return write!(formatter, "{}", self.char());
     }
 }
 
