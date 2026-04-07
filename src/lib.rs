@@ -1007,36 +1007,42 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + Debug + Defa
 }
 
 impl Default for BrailleChar {
+    #[inline(always)]
     fn default() -> Self {
         return Self::EMPTY;
     }
 }
 
 impl Default for BrailleCharUnOrdered {
+    #[inline(always)]
     fn default() -> Self {
         return Self::EMPTY;
     }
 }
 
 impl Debug for BrailleChar {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         return write!(formatter, "BrailleChar({:08b}) = '{}'", self.0, self.char());
     }
 }
 
 impl Debug for BrailleCharUnOrdered {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         return write!(formatter, "BrailleCharUnOrdered({:08b}) = '{}'", self.0, self.char());
     }
 }
 
 impl Display for BrailleChar {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         return write!(formatter, "{}", self.char());
     }
 }
 
 impl Display for BrailleCharUnOrdered {
+    #[inline(always)]
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         return write!(formatter, "{}", self.char());
     }
@@ -1087,6 +1093,7 @@ impl Into<u32> for BrailleCharUnOrdered {
 impl BitAnd<Self> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitand(self, rhs: Self) -> Self::Output {
         return Self::bitand(&self, &rhs);
     }
@@ -1095,18 +1102,21 @@ impl BitAnd<Self> for BrailleChar {
 impl BitAnd<Self> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitand(self, rhs: Self) -> Self::Output {
         return Self::bitand(&self, &rhs);
     }
 }
 
 impl BitAndAssign<Self> for BrailleChar {
+    #[inline(always)]
     fn bitand_assign(&mut self, rhs: Self) {
         Self::bitand_assign(self, &rhs);
     }
 }
 
 impl BitAndAssign<Self> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitand_assign(&mut self, rhs: Self) {
         Self::bitand_assign(self, &rhs);
     }
@@ -1115,6 +1125,7 @@ impl BitAndAssign<Self> for BrailleCharUnOrdered {
 impl BitOr<Self> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitor(self, rhs: Self) -> Self::Output {
         return Self::bitor(&self, &rhs);
     }
@@ -1123,18 +1134,21 @@ impl BitOr<Self> for BrailleChar {
 impl BitOr<Self> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitor(self, rhs: Self) -> Self::Output {
         return Self::bitor(&self, &rhs);
     }
 }
 
 impl BitOrAssign<Self> for BrailleChar {
+    #[inline(always)]
     fn bitor_assign(&mut self, rhs: Self) {
         Self::bitor_assign(self, &rhs);
     }
 }
 
 impl BitOrAssign<Self> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitor_assign(&mut self, rhs: Self) {
         Self::bitor_assign(self, &rhs);
     }
@@ -1143,6 +1157,7 @@ impl BitOrAssign<Self> for BrailleCharUnOrdered {
 impl BitXor<Self> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitxor(self, rhs: Self) -> Self::Output {
         return Self::bitxor(&self, &rhs);
     }
@@ -1151,18 +1166,21 @@ impl BitXor<Self> for BrailleChar {
 impl BitXor<Self> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitxor(self, rhs: Self) -> Self::Output {
         return Self::bitxor(&self, &rhs);
     }
 }
 
 impl BitXorAssign<Self> for BrailleChar {
+    #[inline(always)]
     fn bitxor_assign(&mut self, rhs: Self) {
         Self::bitxor_assign(self, &rhs);
     }
 }
 
 impl BitXorAssign<Self> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitxor_assign(&mut self, rhs: Self) {
         Self::bitxor_assign(self, &rhs);
     }
@@ -1171,6 +1189,7 @@ impl BitXorAssign<Self> for BrailleCharUnOrdered {
 impl BitAnd<u8> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitand(self, rhs: u8) -> Self::Output {
         return Self::bitand_byte(&self, rhs);
     }
@@ -1179,18 +1198,21 @@ impl BitAnd<u8> for BrailleChar {
 impl BitAnd<u8> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitand(self, rhs: u8) -> Self::Output {
         return Self::bitand_byte(&self, rhs);
     }
 }
 
 impl BitAndAssign<u8> for BrailleChar {
+    #[inline(always)]
     fn bitand_assign(&mut self, rhs: u8) {
         Self::bitand_byte_assign(self, rhs);
     }
 }
 
 impl BitAndAssign<u8> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitand_assign(&mut self, rhs: u8) {
         Self::bitand_byte_assign(self, rhs);
     }
@@ -1199,6 +1221,7 @@ impl BitAndAssign<u8> for BrailleCharUnOrdered {
 impl BitOr<u8> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitor(self, rhs: u8) -> Self::Output {
         return Self::bitor_byte(&self, rhs);
     }
@@ -1207,18 +1230,21 @@ impl BitOr<u8> for BrailleChar {
 impl BitOr<u8> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitor(self, rhs: u8) -> Self::Output {
         return Self::bitor_byte(&self, rhs);
     }
 }
 
 impl BitOrAssign<u8> for BrailleChar {
+    #[inline(always)]
     fn bitor_assign(&mut self, rhs: u8) {
         Self::bitor_byte_assign(self, rhs);
     }
 }
 
 impl BitOrAssign<u8> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitor_assign(&mut self, rhs: u8) {
         Self::bitor_byte_assign(self, rhs);
     }
@@ -1227,6 +1253,7 @@ impl BitOrAssign<u8> for BrailleCharUnOrdered {
 impl BitXor<u8> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn bitxor(self, rhs: u8) -> Self::Output {
         return Self::bitxor_byte(&self, rhs);
     }
@@ -1235,18 +1262,21 @@ impl BitXor<u8> for BrailleChar {
 impl BitXor<u8> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn bitxor(self, rhs: u8) -> Self::Output {
         return Self::bitxor_byte(&self, rhs);
     }
 }
 
 impl BitXorAssign<u8> for BrailleChar {
+    #[inline(always)]
     fn bitxor_assign(&mut self, rhs: u8) {
         Self::bitxor_byte_assign(self, rhs);
     }
 }
 
 impl BitXorAssign<u8> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn bitxor_assign(&mut self, rhs: u8) {
         Self::bitxor_byte_assign(self, rhs);
     }
@@ -1255,6 +1285,7 @@ impl BitXorAssign<u8> for BrailleCharUnOrdered {
 impl Not for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn not(self) -> Self::Output {
         return Self::not(&self);
     }
@@ -1263,6 +1294,7 @@ impl Not for BrailleChar {
 impl Not for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn not(self) -> Self::Output {
         return Self::not(&self);
     }
@@ -1271,6 +1303,7 @@ impl Not for BrailleCharUnOrdered {
 impl Shl<u8> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn shl(self, rhs: u8) -> Self::Output {
         return Self::shl(&self, rhs);
     }
@@ -1279,18 +1312,21 @@ impl Shl<u8> for BrailleChar {
 impl Shl<u8> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn shl(self, rhs: u8) -> Self::Output {
         return Self::shl(&self, rhs);
     }
 }
 
 impl ShlAssign<u8> for BrailleChar {
+    #[inline(always)]
     fn shl_assign(&mut self, rhs: u8) {
         Self::shl_assign(self, rhs);
     }
 }
 
 impl ShlAssign<u8> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn shl_assign(&mut self, rhs: u8) {
         Self::shl_assign(self, rhs);
     }
@@ -1299,6 +1335,7 @@ impl ShlAssign<u8> for BrailleCharUnOrdered {
 impl Shr<u8> for BrailleChar {
     type Output = Self;
 
+    #[inline(always)]
     fn shr(self, rhs: u8) -> Self::Output {
         return Self::shr(&self, rhs);
     }
@@ -1307,18 +1344,21 @@ impl Shr<u8> for BrailleChar {
 impl Shr<u8> for BrailleCharUnOrdered {
     type Output = Self;
 
+    #[inline(always)]
     fn shr(self, rhs: u8) -> Self::Output {
         return Self::shr(&self, rhs);
     }
 }
 
 impl ShrAssign<u8> for BrailleChar {
+    #[inline(always)]
     fn shr_assign(&mut self, rhs: u8) {
         Self::shr_assign(self, rhs);
     }
 }
 
 impl ShrAssign<u8> for BrailleCharUnOrdered {
+    #[inline(always)]
     fn shr_assign(&mut self, rhs: u8) {
         Self::shr_assign(self, rhs);
     }
