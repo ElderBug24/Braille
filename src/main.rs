@@ -37,5 +37,7 @@ fn main() {
         let char = BrailleChar::from_unordered(byte);
 
         println!("_\n{}|\n", char.char());
+        println!("{:?}", MAP_UNORDERED_TO_ORDERED_BYTEWISE);
+        println!("{}", u8::MAX);
     }
 }

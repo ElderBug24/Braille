@@ -29,7 +29,7 @@ fn main() {
 
     for y in 0..H {
         for x in 0..W {
-            print!("{}", array.get_char(x, y).char());
+            print!("{}", array.get_char(x, y).unwrap().char());
         }
         println!();
     }

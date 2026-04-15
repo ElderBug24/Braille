@@ -8,7 +8,21 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 use std::fmt::{self, Debug, Display};
 
 #[inline(always)]
-pub const fn unordered_to_ordered(b: u8) -> u8 {
+pub const fn ordered_to_unordered_bitwise(b: u8) -> u8 {
+    let b = b & 0b_0001_0000
+        |  (b & 0b_1000_0000) >> 7
+        |  (b & 0b_0100_0000) >> 5
+        |  (b & 0b_0010_0000) >> 3
+        |  (b & 0b_0000_1000) << 3
+        |  (b & 0b_0000_0100) << 1
+        |  (b & 0b_0000_0010) << 4
+        |  (b & 0b_0000_0001) << 7;
+
+    return b;
+}
+
+#[inline(always)]
+pub const fn unordered_to_ordered_bitwise(b: u8) -> u8 {
     let b = b & 0b_0001_0000
         |  (b & 0b_1000_0000) >> 7
         |  (b & 0b_0100_0000) >> 3
@@ -21,18 +35,12 @@ pub const fn unordered_to_ordered(b: u8) -> u8 {
     return b;
 }
 
-#[inline(always)]
-pub const fn ordered_to_unordered(b: u8) -> u8 {
-    let b = b & 0b_0001_0000
-        |  (b & 0b_1000_0000) >> 7
-        |  (b & 0b_0100_0000) >> 5
-        |  (b & 0b_0010_0000) >> 3
-        |  (b & 0b_0000_1000) << 3
-        |  (b & 0b_0000_0100) << 1
-        |  (b & 0b_0000_0010) << 4
-        |  (b & 0b_0000_0001) << 7;
+pub const fn ordered_to_unordered_bytewise(b: u8) -> u8 {
+    return MAP_ORDERED_TO_UNORDERED_BYTEWISE[b as usize];
+}
 
-    return b;
+pub const fn unordered_to_ordered_bytewise(b: u8) -> u8 {
+    return MAP_UNORDERED_TO_ORDERED_BYTEWISE[b as usize];
 }
 
 #[inline(always)]
@@ -195,9 +203,46 @@ pub const unsafe fn set_bit_2d_unchecked(byte: u8, x: u8, y: u8, value: bool) ->
     return unsafe { set_bit_unchecked(byte, x + y * 2, value) };
 }
 
-pub const MAP_ORDERED_TO_UNORDERED: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
-pub const MAP_UNORDERED_TO_ORDERED: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
-pub const MAP_TRANSPARENT:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+pub const MAP_ORDERED_TO_UNORDERED_BITWISE: [u8; 8] = [7, 6, 5, 3, 1, 4, 2, 0];
+pub const MAP_UNORDERED_TO_ORDERED_BITWISE: [u8; 8] = [7, 4, 6, 3, 5, 2, 1, 0];
+pub const MAP_TRANSPARENT_BITWISE:          [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
+
+pub const MAP_ORDERED_TO_UNORDERED_BYTEWISE: [u8; 256] = {
+    let mut arr = [0; 256];
+
+    let mut i = 0_usize;
+    while i < 256 {
+        arr[i] = ordered_to_unordered_bitwise(i as u8);
+
+        i += 1;
+    }
+
+    arr
+};
+pub const MAP_UNORDERED_TO_ORDERED_BYTEWISE: [u8; 256] = {
+    let mut arr = [0; 256];
+
+    let mut i = 0_usize;
+    while i < 256 {
+        arr[i] = unordered_to_ordered_bitwise(i as u8);
+
+        i += 1;
+    }
+
+    arr
+};
+pub const MAP_TRANSPARENT_BYTEWISE: [u8; 256] = {
+    let mut arr = [0; 256];
+
+    let mut i = 0_usize;
+    while i < 256 {
+        arr[i] = i as u8;
+
+        i += 1;
+    }
+
+    arr
+};
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct BrailleChar(u8);
@@ -209,8 +254,10 @@ impl BrailleChar {
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
     pub const IS_ORDERED: bool = true;
-    pub const MAP_TO_UNORDERED: [u8; 8] = MAP_ORDERED_TO_UNORDERED;
-    pub const MAP_TO_ORDERED:   [u8; 8] = MAP_TRANSPARENT;
+    pub const MAP_TO_UNORDERED_BITWISE:  [u8; 8] = MAP_ORDERED_TO_UNORDERED_BITWISE;
+    pub const MAP_TO_ORDERED_BITWISE:    [u8; 8] = MAP_TRANSPARENT_BITWISE;
+    pub const MAP_TO_UNORDERED_BYTEWISE: [u8; 256] = MAP_ORDERED_TO_UNORDERED_BYTEWISE;
+    pub const MAP_TO_ORDERED_BYTEWISE:   [u8; 256] = MAP_TRANSPARENT_BYTEWISE;
 
     #[inline(always)]
     pub const fn ordered(&self) -> u8 {
@@ -220,7 +267,7 @@ impl BrailleChar {
     #[inline(always)]
     pub const fn unordered(&self) -> u8 {
         let Self(b) = self;
-        let b = ordered_to_unordered(*b);
+        let b = ordered_to_unordered_bytewise(*b);
 
         return b;
     }
@@ -232,7 +279,7 @@ impl BrailleChar {
 
     #[inline(always)]
     pub const fn from_unordered(b: u8) -> Self {
-        let b = unordered_to_ordered(b);
+        let b = unordered_to_ordered_bytewise(b);
 
         return Self(b);
     }
@@ -449,8 +496,10 @@ impl BrailleCharTrait for BrailleChar {
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
     const IS_ORDERED: bool = Self::IS_ORDERED;
-    const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
-    const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
+    const MAP_TO_UNORDERED_BITWISE:  [u8; 8] = Self::MAP_TO_UNORDERED_BITWISE;
+    const MAP_TO_ORDERED_BITWISE:    [u8; 8] = Self::MAP_TO_ORDERED_BITWISE;
+    const MAP_TO_UNORDERED_BYTEWISE: [u8; 256] = Self::MAP_TO_UNORDERED_BYTEWISE;
+    const MAP_TO_ORDERED_BYTEWISE:   [u8; 256] = Self::MAP_TO_ORDERED_BYTEWISE;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -583,13 +632,15 @@ impl BrailleCharUnOrdered {
     pub const EMPTY: Self = Self(0u8);
     pub const FULL:  Self = Self(255u8);
     pub const IS_ORDERED: bool = false;
-    pub const MAP_TO_UNORDERED: [u8; 8] = MAP_TRANSPARENT;
-    pub const MAP_TO_ORDERED:   [u8; 8] = MAP_UNORDERED_TO_ORDERED;
+    pub const MAP_TO_UNORDERED_BITWISE:  [u8; 8] = MAP_TRANSPARENT_BITWISE;
+    pub const MAP_TO_ORDERED_BITWISE:    [u8; 8] = MAP_UNORDERED_TO_ORDERED_BITWISE;
+    pub const MAP_TO_UNORDERED_BYTEWISE: [u8; 256] = MAP_TRANSPARENT_BYTEWISE;
+    pub const MAP_TO_ORDERED_BYTEWISE:   [u8; 256] = MAP_UNORDERED_TO_ORDERED_BYTEWISE;
 
     #[inline(always)]
     pub const fn ordered(&self) -> u8 {
         let Self(b) = self;
-        let b = unordered_to_ordered(*b);
+        let b = unordered_to_ordered_bytewise(*b);
 
         return b;
     }
@@ -601,7 +652,7 @@ impl BrailleCharUnOrdered {
 
     #[inline(always)]
     pub const fn from_ordered(b: u8) -> Self {
-        let b = ordered_to_unordered(b);
+        let b = ordered_to_unordered_bytewise(b);
 
         return Self(b);
     }
@@ -823,8 +874,10 @@ impl BrailleCharTrait for BrailleCharUnOrdered {
     const EMPTY: Self = Self::EMPTY;
     const FULL:  Self = Self::FULL;
     const IS_ORDERED: bool = Self::IS_ORDERED;
-    const MAP_TO_UNORDERED: [u8; 8] = Self::MAP_TO_UNORDERED;
-    const MAP_TO_ORDERED:   [u8; 8] = Self::MAP_TO_ORDERED;
+    const MAP_TO_UNORDERED_BITWISE:  [u8; 8] = Self::MAP_TO_UNORDERED_BITWISE;
+    const MAP_TO_ORDERED_BITWISE:    [u8; 8] = Self::MAP_TO_ORDERED_BITWISE;
+    const MAP_TO_UNORDERED_BYTEWISE: [u8; 256] = Self::MAP_TO_UNORDERED_BYTEWISE;
+    const MAP_TO_ORDERED_BYTEWISE:   [u8; 256] = Self::MAP_TO_ORDERED_BYTEWISE;
 
     #[inline(always)]
     fn ordered(&self) -> u8 {
@@ -954,8 +1007,10 @@ pub trait BrailleCharTrait: Sized + Copy + Clone + PartialEq + Eq + Debug + Defa
     const EMPTY: Self;
     const FULL:  Self;
     const IS_ORDERED: bool;
-    const MAP_TO_UNORDERED: [u8; 8];
-    const MAP_TO_ORDERED:   [u8; 8];
+    const MAP_TO_UNORDERED_BITWISE:  [u8; 8];
+    const MAP_TO_ORDERED_BITWISE:    [u8; 8];
+    const MAP_TO_UNORDERED_BYTEWISE: [u8; 256];
+    const MAP_TO_ORDERED_BYTEWISE:   [u8; 256];
 
     fn ordered(&self) -> u8;
 

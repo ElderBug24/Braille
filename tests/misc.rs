@@ -1,4 +1,4 @@
-use braille::{BrailleChar, BrailleCharUnOrdered, byte_to_array, array_to_byte, get_bit, get_bit_2d, set_bit, set_bit_2d, MASK_ORDERED_TO_UNORDERED, MASK_UNORDERED_TO_ORDERED};
+use braille::{BrailleChar, BrailleCharUnOrdered, byte_to_array, array_to_byte, get_bit, get_bit_2d, set_bit, set_bit_2d, MAP_ORDERED_TO_UNORDERED_BITWISE, MAP_UNORDERED_TO_ORDERED_BITWISE};
 
 
 #[test]
@@ -150,14 +150,14 @@ fn masks() {
     let char = BrailleChar::from_unordered(byte);
 
     for i in 0..8 {
-        let index = MASK_UNORDERED_TO_ORDERED[i];
+        let index = MAP_UNORDERED_TO_ORDERED_BITWISE[i];
         assert_eq!(arr[i], char.get_at(index));
     }
 
     let char = BrailleCharUnOrdered::from_ordered(byte);
 
     for i in 0..8 {
-        let index = MASK_ORDERED_TO_UNORDERED[i];
+        let index = MAP_ORDERED_TO_UNORDERED_BITWISE[i];
         assert_eq!(arr[i], char.get_at(index));
     }
 }
