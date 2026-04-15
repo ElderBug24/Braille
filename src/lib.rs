@@ -35,10 +35,12 @@ pub const fn unordered_to_ordered_bitwise(b: u8) -> u8 {
     return b;
 }
 
+#[inline(always)]
 pub const fn ordered_to_unordered_bytewise(b: u8) -> u8 {
     return MAP_ORDERED_TO_UNORDERED_BYTEWISE[b as usize];
 }
 
+#[inline(always)]
 pub const fn unordered_to_ordered_bytewise(b: u8) -> u8 {
     return MAP_UNORDERED_TO_ORDERED_BYTEWISE[b as usize];
 }
